@@ -43,21 +43,6 @@ exports = module.exports = function(app, passport) {
     }
   ));
 
-  if (app.config.oauth.google.key) {
-    passport.use(new GoogleStrategy({
-        clientID: app.config.oauth.google.key,
-        clientSecret: app.config.oauth.google.secret
-      },
-      function(accessToken, refreshToken, profile, done) {
-        done(null, false, {
-          accessToken: accessToken,
-          refreshToken: refreshToken,
-          profile: profile
-        });
-      }
-    ));
-  }
-
   passport.serializeUser(function(user, done) {
     done(null, user._id);
   });

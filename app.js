@@ -1,11 +1,18 @@
 'use strict';
 
+var fs = require('fs');
+
+if (!fileExists("./config.js")) {
+    console.log("error config.js is missing");
+    return;
+}
+
 //dependencies
 var config = require('./config'),
     express = require('express'),
     bodyParser = require('body-parser'),
     cookieParser = require('cookie-parser'),
-    fs = require('fs'),
+    http = require('http'),
     https = require('https'),
     request = require('request'),
     session = require('express-session'),
@@ -50,10 +57,17 @@ app.use('/api', app.api);
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Avoids DEPTH_ZERO_SELF_SIGNED_CERT error for self-signed certs
 
 //setup server
-var server = https.createServer({
-    key: fs.readFileSync('server.key'),
-    cert: fs.readFileSync('server.crt')
-}, app);
+var server;
+
+if (fileExists(config.httpsConfig.key) && fileExists(config.httpsConfig.pem)) {
+    server = https.createServer({
+        key: fs.readFileSync(config.httpsConfig.key),
+        cert: fs.readFileSync(config.httpsConfig.pem)
+    }, app);
+}
+else {
+    server = http.createServer(app);
+}
 
 //setup mongoose
 app.db = mongoose.createConnection(config.mongodb.uri);
@@ -119,6 +133,7 @@ require('./routes')(app);
 //setup utilities
 app.utility = {};
 app.utility.sendmail = require('./util/sendmail');
+app.utility.slugify = require('./util/slugify');
 app.utility.workflow = require('./util/workflow');
 
 // launch listening loop
@@ -143,4 +158,21 @@ function createApiRouter(config, morgan, accessLogStream) {
     require('./apiRoutes')(router);
 
     return router
+}
+
+function fileExists(path) {
+
+    try {
+        return fs.statSync(path).isFile();
+    }
+    catch (e) {
+
+        if (e.code == 'ENOENT') { // no such file or directory. File really does not exist
+            console.log("File does not exist.");
+            return false;
+        }
+
+        console.log("Exception fs.statSync (" + path + "): " + e);
+        throw e; // something else went wrong, we don't have rights, ...
+    }
 }
