@@ -46,7 +46,8 @@ var accessLogStream = FileStreamRotator.getStream({
 app.config = config;
 
 // setup the logger
-app.use(morgan(app.config.logFormat, {stream: accessLogStream}))
+//app.use(morgan(app.config.logFormat, {stream: accessLogStream}))
+app.use(require('morgan')('dev'));
 
 // create api router
 app.api = createApiRouter(app.config, morgan, accessLogStream);
