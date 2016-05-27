@@ -1,6 +1,6 @@
 # Google Cross Client - Node JS
 
-Node JS server part that authentify with remote server compliant with <a href="https://developers.google.com/identity/protocols/CrossClientAuth">google standards</a>
+Node JS server part authentifying clients with google authentication compliant with <a href="https://developers.google.com/identity/protocols/CrossClientAuth">google standards</a>
 
 Android devices will send their device serial + google JWT token to this server which will check google authentication, check device serial from a whitelist and store email/serial in database
 
