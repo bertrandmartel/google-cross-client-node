@@ -66,7 +66,7 @@ if (("httpsConfig" in config) && ("key" in config.httpsConfig) && ("pem" in conf
         key: fs.readFileSync(config.httpsConfig.key),
         cert: fs.readFileSync(config.httpsConfig.pem)
     }, app);
-    protocol='https';
+    protocol = 'https';
 }
 else {
     server = http.createServer(app);
