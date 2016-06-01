@@ -59,12 +59,14 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Avoids DEPTH_ZERO_SELF_SIGNED
 
 //setup server
 var server;
+var protocol = 'http';
 
-if (fileExists(config.httpsConfig.key) && fileExists(config.httpsConfig.pem)) {
+if (("httpsConfig" in config) && ("key" in config.httpsConfig) && ("pem" in config.httpsConfig) && fileExists(config.httpsConfig.key) && fileExists(config.httpsConfig.pem)) {
     server = https.createServer({
         key: fs.readFileSync(config.httpsConfig.key),
         cert: fs.readFileSync(config.httpsConfig.pem)
     }, app);
+    protocol='https';
 }
 else {
     server = http.createServer(app);
@@ -140,7 +142,7 @@ app.utility.workflow = require('./util/workflow');
 // launch listening loop
 server.listen(app.get('port'), function () {
 
-    console.log("Server listening at https://%s:%s", server.address().address, server.address().port)
+    console.log("Server listening at " + protocol + "://%s:%s", server.address().address, server.address().port)
 
 })
 
