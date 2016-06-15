@@ -24,6 +24,7 @@ var config = require('./config'),
     morgan = require('morgan'),
     FileStreamRotator = require('file-stream-rotator'),
     google = require('googleapis'),
+    crypto = require('crypto'),
     csrf = require('csurf');
 
 //create express app
@@ -31,8 +32,10 @@ var app = express();
 
 var OAuth2 = google.auth.OAuth2;
 app.oauth2Client = new OAuth2(config.google.clientId, config.google.clientSecret, config.google.redirectUri);
+app.google = google;
 
 app.reqmod = request;
+app.crypto = crypto;
 
 var logDirectory = __dirname + '/log'
 

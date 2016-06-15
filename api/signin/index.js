@@ -142,7 +142,7 @@ exports.init = function (req, res) {
         });
     });
 
-//check for duplicates in database
+    //check for duplicates in database
     workflow.on('duplicatedevicesCheck', function () {
 
         req.app.db.models.Device.findById(req.app.utility.slugify(req.email + ' ' + req.body.hash)).exec(function (err, devices) {
