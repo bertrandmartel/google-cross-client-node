@@ -18,6 +18,9 @@ function ensureAdmin(req, res, next) {
 
 exports = module.exports = function(app) {
 
+  //oauth api
+  app.get('/oauth/login', require('./views/oauth/index').init);
+
   //login/out
   app.get('/login/', require('./views/login/index').init);
   app.post('/login/', require('./views/login/index').login);

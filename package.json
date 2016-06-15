@@ -20,6 +20,7 @@
     "express": "^4.13.3",
     "express-session": "1.x.x",
     "file-stream-rotator": "0.0.6",
+    "googleapis": "^8.0.0",
     "helmet": "2.x.x",
     "jade": "1.x.x",
     "mongoose": "^4.4.16",

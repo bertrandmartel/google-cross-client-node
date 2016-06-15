@@ -1,0 +1,125 @@
+<!-- The top of file index.html -->
+<html itemscope itemtype="http://schema.org/Article">
+<head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script src="https://apis.google.com/js/platform.js?onload=start" parsetags="explicit" async defer></script>
+    <title>Google authentication</title>
+    <script>
+        var QueryString = function () {
+            // This function is anonymous, is executed immediately and
+            // the return value is assigned to QueryString!
+            var query_string = {};
+            var query = window.location.search.substring(1);
+            var vars = query.split("&");
+            for (var i = 0; i < vars.length; i++) {
+
+                var pair = vars[i].split("=");
+                // If first entry with this name
+                if (typeof query_string[pair[0]] === "undefined") {
+                    query_string[pair[0]] = decodeURIComponent(pair[1]);
+                    // If second entry with this name
+                } else if (typeof query_string[pair[0]] === "string") {
+                    var arr = [query_string[pair[0]], decodeURIComponent(pair[1])];
+                    query_string[pair[0]] = arr;
+                    // If third or later entry with this name
+                } else {
+                    query_string[pair[0]].push(decodeURIComponent(pair[1]));
+                }
+            }
+            return query_string;
+        }();
+    </script>
+</head>
+<body>
+<h1>Google Authentication</h1>
+<hr>
+<div id='glogin'></div>
+<hr>
+<div id="log"></div>
+
+<script>
+
+    function startTimer(duration, display) {
+        var timer = duration, minutes, seconds;
+        var interval = setInterval(function () {
+            minutes = parseInt(timer / 60, 10);
+            seconds = parseInt(timer % 60, 10);
+
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            seconds = seconds < 10 ? "0" + seconds : seconds;
+
+            display.text(minutes + ":" + seconds);
+
+            if (--timer < 0) {
+                timer = duration;
+            }
+
+            if (timer == 0) {
+                clearInterval(interval);
+            }
+        }, 1000);
+    }
+
+    var auth2; // The Sign-In object.
+
+    function start() {
+        gapi.load('auth2', function () {
+            auth2 = gapi.auth2.init({
+                client_id: '520708471033-68dbdamd7bmt0q9vgv8pua9nerpf7f2t.apps.googleusercontent.com',
+                scope: 'profile'
+            });
+            // Listen for sign-in state changes.
+            auth2.isSignedIn.listen(signinChanged);
+            // Listen for changes to current user.
+            auth2.currentUser.listen(userChanged);
+            // Render the button
+            gapi.signin2.render('glogin', {
+                'class': 'g-signin',
+                redirect_uri: 'postmessage',
+                onsuccess: signInCallback,
+                cookiepolicy: 'single_host_origin',
+                accesstype: 'offline',
+                theme: 'dark'
+            });
+        });
+
+    }
+
+    /**
+     * Listener method for sign-out live value.
+     *
+     * @param {boolean} val the updated signed out state.
+     */
+    var signinChanged = function (val) {
+        console.log('Signin state changed to ', val);
+    };
+
+    /**
+     * Listener method for when the user changes.
+     *
+     * @param {GoogleUser} user the updated user.
+     */
+    var userChanged = function (user) {
+        console.log('User now: ', user);
+    };
+
+    function signInCallback(authResult) {
+        if (authResult['code']) {
+            // Send the code to the server
+            if ((QueryString != null) && ('state' in QueryString)) {
+                document.getElementById("log").innerHTML = '<p>Authentication success ! You will be redirected in <span id="time">00:10</span> seconds</p>';
+                var display = $('#time');
+                startTimer(10, display);
+                window.location.href = authentication_uri + "?" + 'code=' + authResult['code'] + '&state=' + QueryString.state;
+            }
+            else {
+                document.getElementById("log").innerHTML = "<p>origin is not valid. can't connect</p>";
+            }
+        }
+    }
+
+</script>
+
+
+</body>
+</html>
