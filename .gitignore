@@ -7,3 +7,6 @@ node_modules/*
 .nodemonignore
 log/*
 server.*
+.idea/workspace.xml
+.idea/libraries
+.DS_Store
