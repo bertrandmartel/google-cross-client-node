@@ -137,6 +137,10 @@ app.locals.copyrightName = app.config.companyName;
 //setup passport
 require('./passport')(app, passport);
 
+if ("authentication_thirdpart" in app.config && "google_oauth_cors_filter" in app.config.authentication_thirdpart) {
+    app.all(app.config.authentication_thirdpart.google_oauth_cors_filter, [require('./middlewares/googlecors')]);
+}
+
 //setup routes
 require('./routes')(app);
 

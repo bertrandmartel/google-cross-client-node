@@ -69,6 +69,45 @@ function checkParams(req, check_redirect) {
     return true;
 }
 
+exports.userinfo = function (req, res) {
+
+    var authorization = req.headers['authorization'];
+
+    if (('authorization' in req.headers) && (typeof authorization !== 'undefined' && authorization !== null)) {
+
+        var items = authorization.split(/[ ]+/);
+
+        if (items.length > 1 && items[0].trim() == "Bearer") {
+
+            req.app.oauth2Client.setCredentials({
+                "access_token": items[1].trim()
+            });
+
+            req.app.google.oauth2("v2").userinfo.v2.me.get({auth: req.app.oauth2Client}, function (e, profile) {
+
+                if ("email" in profile && "link" in profile && "name" in profile) {
+                    res.status(200).send({
+                        "data": {
+                            "name": profile.name,
+                            "id": profile.email,
+                            "url": profile.link
+                        }
+                    });
+                }
+                else {
+                    res.status(500).send({
+                        "errors": [
+                            {
+                                "message": "user info failure"
+                            }
+                        ]
+                    });
+                }
+            })
+        }
+    }
+}
+
 exports.tokensignin = function (req, res) {
 
     console.log("in tokensignin");
@@ -113,9 +152,9 @@ exports.tokensignin = function (req, res) {
 
                                 console.log(profile.email);
 
-                                var query = req.app.db.models.Device.find({}).select({"email": profile.email});
+                                var query = req.app.db.models.Device.find({}).select('email -_id');
 
-                                query.exec(function (err, someValue) {
+                                query.where('email', profile.email).exec(function (err, someValue) {
                                     if (err) {
                                         console.log(err);
                                         sendError(tokens, res, "select device failure");
@@ -239,9 +278,9 @@ exports.tokensignin = function (req, res) {
 
                                 console.log(profile.email);
 
-                                var query = req.app.db.models.Device.find({}).select({"email": profile.email});
-
-                                query.exec(function (err, someValue) {
+                                var query = req.app.db.models.Device.find({}).select('email -_id');
+                                
+                                query.where('email', profile.email).exec(function (err, someValue) {
                                     if (err) {
                                         console.log(err);
                                         sendError(tokens, res, "select device failure");
