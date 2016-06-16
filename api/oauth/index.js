@@ -152,7 +152,7 @@ exports.tokensignin = function (req, res) {
 
                                 console.log(profile.email);
 
-                                var query = req.app.db.models.Device.find({}).select('email -_id');
+                                var query = req.app.db.models.Device.find({}).select('email _id');
 
                                 query.where('email', profile.email).exec(function (err, someValue) {
                                     if (err) {
@@ -278,8 +278,8 @@ exports.tokensignin = function (req, res) {
 
                                 console.log(profile.email);
 
-                                var query = req.app.db.models.Device.find({}).select('email -_id');
-                                
+                                var query = req.app.db.models.Device.find({}).select('email _id');
+
                                 query.where('email', profile.email).exec(function (err, someValue) {
                                     if (err) {
                                         console.log(err);
