@@ -64,7 +64,7 @@ app.use(require('morgan')('dev'));
 app.api = createApiRouter(app.config, morgan, accessLogStream);
 
 // mount api before csrf is appended to the app stack
-app.use('/api', app.api);
+app.use('/api/v' + app.config.api.version, app.api);
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Avoids DEPTH_ZERO_SELF_SIGNED_CERT error for self-signed certs
 
@@ -171,7 +171,7 @@ function createApiRouter(config, morgan, accessLogStream) {
 
     router.app = app;
 
-    if ("jwt" in app.config && "secret" in app.config.jwt) {
+    if ("jwt" in app.config && "secret" in app.config.jwt && "private_key" in app.config.jwt) {
         router.all('/ext/*', [require('./middlewares/jwtcors')]);
     } else {
         console.log("jwt not specified in configuration");

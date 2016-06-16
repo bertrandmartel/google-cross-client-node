@@ -21,7 +21,7 @@ module.exports = function (req, res, next) {
 
         if (items.length > 1 && items[0].trim() == "Bearer") {
 
-            var cert = req.app.fs.readFileSync('jwt_cert.pem');
+            var cert = req.app.fs.readFileSync(req.app.config.jwt.private_key);
 
             req.app.jwt.verify(items[1].trim(), cert, function (err, decoded) {
                 if (err) {
