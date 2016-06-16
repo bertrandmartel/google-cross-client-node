@@ -65,7 +65,7 @@
     function start() {
         gapi.load('auth2', function () {
             auth2 = gapi.auth2.init({
-                client_id: '520708471033-68dbdamd7bmt0q9vgv8pua9nerpf7f2t.apps.googleusercontent.com',
+                client_id: client_id,
                 scope: 'profile'
             });
             // Listen for sign-in state changes.
