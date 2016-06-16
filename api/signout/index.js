@@ -34,7 +34,7 @@ exports.init = function (req, res) {
     //verify token
     workflow.on('verifier_signout', function () {
 
-        console.log("find token : " + req.body.token + " et " + req.app.config.gcm.clientId);
+        console.log("find token : " + req.body.token);
 
         req.app.reqmod('https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' + req.body.token, function (error, response, body) {
 

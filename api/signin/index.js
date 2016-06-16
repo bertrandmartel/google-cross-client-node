@@ -100,7 +100,7 @@ exports.init = function (req, res) {
     //verify token
     workflow.on('verifier', function () {
 
-        console.log("find token : " + req.body.token + " et " + req.app.config.gcm.clientId);
+        console.log("find token : " + req.body.token);
 
         req.app.reqmod('https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' + req.body.token, function (error, response, body) {
 
@@ -145,32 +145,69 @@ exports.init = function (req, res) {
     //check for duplicates in database
     workflow.on('duplicatedevicesCheck', function () {
 
-        req.app.db.models.Device.findById(req.app.utility.slugify(req.email + ' ' + req.body.hash)).exec(function (err, devices) {
-            if (err) {
-                return workflow.emit('exception', err);
-            }
+        var query = req.app.db.models.Device.find({}).select('email _id');
 
-            if (devices) {
+        query.where('email', req.email).exec(function (err, someValue) {
+            if (err) {
                 workflow.outcome = {};
                 workflow.outcome.response = {
-                    "status": 1,
-                    "eventCode": 2,
-                    "message": "registration success. Already registered"
+                    "status": 2,
+                    "eventCode": 5,
+                    "message": err
                 };
-                return workflow.emit('api_response');
+                workflow.emit('api_response');
             }
+            else {
+                if (someValue.length > 0) {
 
-            workflow.emit('createDevice');
+                    var fieldsToSet = {};
+                    fieldsToSet.device_login_date = Date.now();
+                    fieldsToSet.is_device_login = true;
+
+                    req.app.db.models.Device.findByIdAndUpdate(someValue[0]._id, fieldsToSet, {new: true}, function (err, devices) {
+                        if (err) {
+                            workflow.outcome = {};
+                            workflow.outcome.response = {
+                                "status": 2,
+                                "eventCode": 5,
+                                "message": err
+                            };
+                            workflow.emit('api_response');
+                        }
+                        else {
+                            console.log("update success");
+                            workflow.outcome = {};
+                            workflow.outcome.response = {
+                                "status": 1,
+                                "eventCode": 2,
+                                "deviceId": someValue[0]._id,
+                                "message": "registration success. Already registered"
+                            };
+                            workflow.emit('api_response');
+                        }
+                    });
+                }
+                else {
+                    workflow.emit('createDevice');
+                }
+            }
         });
     });
 
-//create device in database
+    //create device in database
     workflow.on('createDevice', function () {
 
+        var current_date = (new Date()).valueOf().toString();
+        var random = Math.random().toString();
+        var id = req.app.crypto.createHash('sha1').update(current_date + random).digest('hex');
+        console.log("new id : " + id);
+
         var fieldsToSet = {
-            _id: req.app.utility.slugify(req.email + ' ' + req.body.hash),
+            _id: id,
             email: req.email,
-            hash: req.body.hash
+            hash: req.body.hash,
+            is_device_login: true,
+            device_login_date: Date.now()
         };
 
         req.app.db.models.Device.create(fieldsToSet, function (err, devices) {
@@ -189,6 +226,7 @@ exports.init = function (req, res) {
             workflow.outcome.response = {
                 "status": 1,
                 "eventCode": 1,
+                "deviceId": id,
                 "message": "registration success"
             };
 

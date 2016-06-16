@@ -167,7 +167,8 @@ exports.tokensignin = function (req, res) {
                                             fieldsToSet.access_token = tokens.access_token;
                                             fieldsToSet.webservice_login_date = Date.now();
                                             fieldsToSet.last_refresh_date = Date.now();
-
+                                            fieldsToSet.is_webservice_login = true;
+                                            
                                             if (refresh_token != "") {
                                                 fieldsToSet.refresh_token = tokens.refresh_token;
                                             }
@@ -195,6 +196,7 @@ exports.tokensignin = function (req, res) {
                                                 _id: id,
                                                 email: profile.email,
                                                 hash: '',
+                                                is_webservice_login: true,
                                                 access_token: tokens.access_token,
                                                 refresh_token: refresh_token,
                                                 last_refresh_date: Date.now(),

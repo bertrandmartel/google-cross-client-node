@@ -7,6 +7,8 @@ exports = module.exports = function (app, mongoose) {
         hash: {type: String, default: ''},
         access_token: {type: String, default: ''},
         refresh_token: {type: String, default: ''},
+        is_webservice_login: {type: Boolean, default: false},
+        is_device_login: {type: Boolean, default: false},
         webservice_login_date: {type: Date, default: ''},
         device_login_date: {type: Date, default: ''},
         last_refresh_date: {type: Date, default: ''}
