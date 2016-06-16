@@ -36,8 +36,10 @@ exports.loginAttempts = {
   forIpAndUser: 7,
   logExpiration: '20m'
 };
+
 exports.requireAccountVerification = true;
 exports.disableSignUp = true;
+
 exports.smtp = {
   from: {
     name: process.env.SMTP_FROM_NAME || exports.projectName + ' Website',
@@ -50,8 +52,26 @@ exports.smtp = {
     ssl: true
   }
 };
-exports.gcm = {
-  clientId: "your_client_id_here"
+exports.google = {
+    clientId: "your_client_id",
+    clientSecret: "your_client_secret",
+    redirectUri: "postmessage"
+};
+
+exports.api = {
+    version: 1
+};
+
+exports.jwt = {
+    secret: "jwt_secret_to_be_used",
+    private_key: "./path/to/jwt_cert.key",
+    public_key: "./path/to/jwt_cert.pem"
+};
+
+exports.authentication_thirdpart = {
+    webservice_uri: "webservice_redirect_uri",
+    user_info_endpoint: "user_info_api_endpoint",
+    google_oauth_cors_filter: "google_cors_api_filter"
 };
 
 ```
@@ -85,6 +105,84 @@ You can set the following filters :
 * `*1234*` : contain 1234
 
 You can whitelist as much device id as you want. By default NO device is authorized
+
+## External APIS
+
+### Device authentication 
+
+* POST /api/v1/signin
+
+* POST /api/v1/signout
+
+### Webservice authentication
+
+* POST /api/v1/oauth/tokensignin
+
+### JWT protected
+
+These APIs should have `Authorization` header with `Bearer` type followed by a JWT token signed with a private key defined in `config.js` as `jwt.private_key` and decoded with a public key defined in the same file as `jwt.public_key`. The secret is defined by `jwt.secret`.
+
+* POST /api/v1/oauth/authstatus
+
+Get auth status for both device & webservice
+
+
+request example :
+
+```
+POST /api/v1/oauth/authstatus HTTP/1.1
+Host: localhost:4747
+Content-Type: application/json
+Authorization: Bearer <your_jwt_token_here>
+
+{
+  "deviceId":"61c8e927a533e30b4785aebcecd5a031b3a06f73"
+}
+```
+
+response body example :
+
+```
+{
+  "deviceId":"akofsdro2323232323"
+}
+```
+
+* POST /api/v1/oauth/device
+
+Get device ID from Google access token
+
+request example :
+
+```
+POST /api/oauth/device HTTP/1.1
+Host: localhost:4747
+Content-Type: application/json
+Authorization: Bearer <your_jwt_token_here>
+
+{
+  "accessToken":"your_access_token_here"
+}
+```
+
+response body example :
+
+```
+{
+  "is_device_login": true,
+  "is_webservice_login": false
+}
+```
+
+note : to encode/decode JWT, <a href="https://github.com/auth0/node-jsonwebtoken">node-jsonwebtoken</a> is used
+
+To encode JWT :
+
+```
+var cert2 = req.app.fs.readFileSync(app.config.jwt.private_key);
+var token = req.app.jwt.sign(app.config.jwt.secret, cert2, {algorithm: 'RS256'});
+console.log(token);
+```
 
 ## License
 
