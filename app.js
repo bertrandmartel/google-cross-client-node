@@ -25,10 +25,14 @@ var config = require('./config'),
     FileStreamRotator = require('file-stream-rotator'),
     google = require('googleapis'),
     crypto = require('crypto'),
+    jwt = require('jsonwebtoken'),
     csrf = require('csurf');
 
 //create express app
 var app = express();
+
+app.jwt = jwt;
+app.fs = fs;
 
 var OAuth2 = google.auth.OAuth2;
 app.oauth2Client = new OAuth2(config.google.clientId, config.google.clientSecret, config.google.redirectUri);
@@ -165,6 +169,13 @@ function createApiRouter(config, morgan, accessLogStream) {
     }));
     router.use(bodyParser.json());
 
+    router.app = app;
+
+    if ("jwt" in app.config && "secret" in app.config.jwt) {
+        router.all('/ext/*', [require('./middlewares/jwtcors')]);
+    } else {
+        console.log("jwt not specified in configuration");
+    }
     // setup the logger
     //router.use(morgan(config.logFormat, {stream: accessLogStream}))
 

@@ -23,6 +23,7 @@
     "googleapis": "^8.0.0",
     "helmet": "2.x.x",
     "jade": "1.x.x",
+    "jsonwebtoken": "^7.0.1",
     "mongoose": "^4.4.16",
     "morgan": "1.x.x",
     "node-gcm": "^0.13.0",
