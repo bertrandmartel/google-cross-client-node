@@ -172,7 +172,7 @@ function createApiRouter(config, morgan, accessLogStream) {
     router.app = app;
 
     if ("jwt" in app.config && "secret" in app.config.jwt && "private_key" in app.config.jwt) {
-        router.all('/api/v1/oauth/ext/*', [require('./middlewares/jwtcors')]);
+        router.all('/oauth/ext/*', [require('./middlewares/jwtcors')]);
     } else {
         console.log("jwt not specified in configuration");
     }
