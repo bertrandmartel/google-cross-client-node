@@ -9,8 +9,8 @@ exports = module.exports = function (router) {
     router.post('/oauth/tokensignin', require('./api/oauth/index').tokensignin);
 
     if ("jwt" in router.app.config && "secret" in router.app.config.jwt && "private_key" in router.app.config.jwt) {
-        router.post('/oauth/authstatus', require('./api/external/index').authenticated);
-        router.post('/oauth/device', require('./api/external/index').accesstoken);
+        router.post('/oauth/ext/authstatus', require('./api/external/index').authenticated);
+        router.post('/oauth/ext/device', require('./api/external/index').accesstoken);
     } else {
         console.log("jwt not specified in configuration");
     }

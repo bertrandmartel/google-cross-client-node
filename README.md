@@ -149,7 +149,7 @@ additionnal parameters :
 
 These APIs should have `Authorization` header with `Bearer` type followed by a JWT token signed with a private key defined in `config.js` as `jwt.private_key` and decoded with a public key defined in the same file as `jwt.public_key`. The secret is defined by `jwt.secret`.
 
-* `POST /api/v1/oauth/authstatus`
+* `POST /api/v1/oauth/ext/authstatus`
 
 Get auth status for both device & webservice
 
@@ -157,7 +157,7 @@ Get auth status for both device & webservice
 request example :
 
 ```
-POST /api/v1/oauth/authstatus HTTP/1.1
+POST /api/v1/oauth/ext/authstatus HTTP/1.1
 Host: localhost:4747
 Content-Type: application/json
 Authorization: Bearer <your_jwt_token_here>
@@ -175,14 +175,14 @@ response body example :
 }
 ```
 
-* `POST /api/v1/oauth/device`
+* `POST /api/v1/oauth/ext/device`
 
 Get device ID from Google access token
 
 request example :
 
 ```
-POST /api/oauth/device HTTP/1.1
+POST /api/oauth/ext/device HTTP/1.1
 Host: localhost:4747
 Content-Type: application/json
 Authorization: Bearer <your_jwt_token_here>
