@@ -206,8 +206,8 @@ note : to encode/decode JWT, <a href="https://github.com/auth0/node-jsonwebtoken
 To encode JWT :
 
 ```
-var cert2 = req.app.fs.readFileSync(app.config.jwt.private_key);
-var token = req.app.jwt.sign(app.config.jwt.secret, cert2, {algorithm: 'RS256'});
+var cert2 = fs.readFileSync(config.jwt.private_key);
+var token = jwt.sign(config.jwt.secret, cert2, {algorithm: 'HS512'});
 console.log(token);
 ```
 

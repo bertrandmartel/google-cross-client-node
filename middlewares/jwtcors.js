@@ -23,7 +23,7 @@ module.exports = function (req, res, next) {
 
             var cert = req.app.fs.readFileSync(req.app.config.jwt.private_key);
 
-            req.app.jwt.verify(items[1].trim(), cert, function (err, decoded) {
+            req.app.jwt.verify(items[1].trim(), cert, {algorithms: ['HS512']}, function (err, decoded) {
                 if (err) {
                     sendError(res, err.message);
                 }
