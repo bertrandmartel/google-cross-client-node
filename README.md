@@ -110,19 +110,46 @@ You can whitelist as much device id as you want. By default NO device is authori
 
 ### Device authentication 
 
-* POST /api/v1/signin
+* `POST /api/v1/signin`
 
-* POST /api/v1/signout
+Device signin api
+
+* `POST /api/v1/signout`
+
+Device signout api
 
 ### Webservice authentication
 
-* POST /api/v1/oauth/tokensignin
+* `POST /api/v1/oauth/tokensignin`
+
+Webservice Oauth2.0 user signin via Oauth2.0 code to request access token / refresh token
+
+{
+  "grant_type":"authorization_code/refresh_token",
+  "client_id":"<your_client_id>",
+  "client_secret":"<your_client_secret>"
+}
+
+** grant_type:authorization_code
+
+additionnal parameters :
+
+* code : oauth2.0 code to be used to request an access token / refresh token
+* redirect_uri : redirect uri (required but not used for now) 
+
+** grant_type:refresh_token
+
+additionnal parameters :
+
+* refresh_token : the refresh token to be used to generate a new access token
+
+
 
 ### JWT protected
 
 These APIs should have `Authorization` header with `Bearer` type followed by a JWT token signed with a private key defined in `config.js` as `jwt.private_key` and decoded with a public key defined in the same file as `jwt.public_key`. The secret is defined by `jwt.secret`.
 
-* POST /api/v1/oauth/authstatus
+* `POST /api/v1/oauth/authstatus`
 
 Get auth status for both device & webservice
 
@@ -148,7 +175,7 @@ response body example :
 }
 ```
 
-* POST /api/v1/oauth/device
+* `POST /api/v1/oauth/device`
 
 Get device ID from Google access token
 
