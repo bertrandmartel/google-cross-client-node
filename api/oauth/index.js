@@ -85,12 +85,12 @@ exports.userinfo = function (req, res) {
 
             req.app.google.oauth2("v2").userinfo.v2.me.get({auth: req.app.oauth2Client}, function (e, profile) {
 
-                if ("email" in profile && "link" in profile && "name" in profile) {
+                if ("email" in profile && "name" in profile) {
                     res.status(200).send({
                         "data": {
                             "name": profile.name,
                             "id": profile.email,
-                            "url": profile.link
+                            "url": ""
                         }
                     });
                 }
