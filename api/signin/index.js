@@ -160,32 +160,44 @@ exports.init = function (req, res) {
             else {
                 if (someValue.length > 0) {
 
-                    var fieldsToSet = {};
-                    fieldsToSet.device_login_date = Date.now();
-                    fieldsToSet.is_device_login = true;
+                    if (someValue[0].hash!==req.body.hash){
+                        workflow.outcome = {};
+                        workflow.outcome.response = {
+                            "status": 2,
+                            "eventCode": 10,
+                            "message": "duplicate device"
+                        };
+                        workflow.emit('api_response');
+                    }
+                    else{
 
-                    req.app.db.models.Device.findByIdAndUpdate(someValue[0]._id, fieldsToSet, {new: true}, function (err, devices) {
-                        if (err) {
-                            workflow.outcome = {};
-                            workflow.outcome.response = {
-                                "status": 2,
-                                "eventCode": 5,
-                                "message": err
-                            };
-                            workflow.emit('api_response');
-                        }
-                        else {
-                            console.log("update success");
-                            workflow.outcome = {};
-                            workflow.outcome.response = {
-                                "status": 1,
-                                "eventCode": 2,
-                                "deviceId": someValue[0]._id,
-                                "message": "registration success. Already registered"
-                            };
-                            workflow.emit('api_response');
-                        }
-                    });
+                        var fieldsToSet = {};
+                        fieldsToSet.device_login_date = Date.now();
+                        fieldsToSet.is_device_login = true;
+
+                        req.app.db.models.Device.findByIdAndUpdate(someValue[0]._id, fieldsToSet, {new: true}, function (err, devices) {
+                            if (err) {
+                                workflow.outcome = {};
+                                workflow.outcome.response = {
+                                    "status": 2,
+                                    "eventCode": 5,
+                                    "message": err
+                                };
+                                workflow.emit('api_response');
+                            }
+                            else {
+                                console.log("update success");
+                                workflow.outcome = {};
+                                workflow.outcome.response = {
+                                    "status": 1,
+                                    "eventCode": 2,
+                                    "deviceId": someValue[0]._id,
+                                    "message": "registration success. Already registered"
+                                };
+                                workflow.emit('api_response');
+                            }
+                        });
+                    }
                 }
                 else {
                     workflow.emit('createDevice');
