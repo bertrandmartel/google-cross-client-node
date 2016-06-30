@@ -160,7 +160,7 @@ exports.init = function (req, res) {
             else {
                 if (someValue.length > 0) {
 
-                    if (someValue[0].hash!==req.body.hash){
+                    if (someValue[0].hash!==req.body.hash && someValue[0].hash!==""){
                         workflow.outcome = {};
                         workflow.outcome.response = {
                             "status": 2,
@@ -174,6 +174,7 @@ exports.init = function (req, res) {
                         var fieldsToSet = {};
                         fieldsToSet.device_login_date = Date.now();
                         fieldsToSet.is_device_login = true;
+                        fieldsToSet.hash = req.body.hash;
 
                         req.app.db.models.Device.findByIdAndUpdate(someValue[0]._id, fieldsToSet, {new: true}, function (err, devices) {
                             if (err) {
