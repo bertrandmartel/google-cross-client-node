@@ -145,7 +145,7 @@ exports.init = function (req, res) {
     //check for duplicates in database
     workflow.on('duplicatedevicesCheck', function () {
 
-        var query = req.app.db.models.Device.find({}).select('email _id');
+        var query = req.app.db.models.Device.find({}).select('email hash _id');
 
         query.where('email', req.email).exec(function (err, someValue) {
             if (err) {
@@ -160,7 +160,7 @@ exports.init = function (req, res) {
             else {
                 if (someValue.length > 0) {
 
-                    if (someValue[0].hash!==req.body.hash && someValue[0].hash!==""){
+                    if (!(someValue[0].hash==req.body.hash) && !(someValue[0].hash=="")){
                         workflow.outcome = {};
                         workflow.outcome.response = {
                             "status": 2,
