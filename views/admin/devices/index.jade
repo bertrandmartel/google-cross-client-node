@@ -21,9 +21,9 @@ block body
     div.page-header
       form.form-inline.pull-right
         div.input-group
-          input.form-control(name='email', type='text', placeholder='email', value!='<%= email %>')
-          input.form-control(name='hash', type='text', placeholder='hash', value!='<%= hash %>')
-          button.btn.btn-primary.btn-add(type='button') Add New
+          <!--input.form-control(name='email', type='text', placeholder='email', value!='<%= email %>')-->
+          <!--input.form-control(name='hash', type='text', placeholder='hash', value!='<%= hash %>')-->
+          <!--button.btn.btn-primary.btn-add(type='button') Add New-->
       h1 Devices
 
   script(type='text/template', id='tmpl-filters')
@@ -40,8 +40,20 @@ block body
           select.form-control(name='sort')
             option(value='_id') id &#9650;
             option(value='-_id') id &#9660;
-            option(value='name') name &#9650;
-            option(value='-name') name &#9660;
+            option(value='hash') hash &#9650;
+            option(value='-hash') hash &#9660;
+            option(value='device_login_date') device_login_date &#9650;
+            option(value='-device_login_date') device_login_date &#9660;
+            option(value='is_device_login') is_device_login &#9650;
+            option(value='-is_device_login') is_device_login &#9660;
+            option(value='is_webservice_login') is_webservice_login &#9650;
+            option(value='-is_webservice_login') is_webservice_login &#9660;
+            option(value='last_refresh_date') last_refresh_date &#9650;
+            option(value='-last_refresh_date') last_refresh_date &#9660;
+            option(value='refresh_token') refresh_token &#9650;
+            option(value='-refresh_token') refresh_token &#9660;
+            option(value='webservice_login_date') webservice_login_date &#9650;
+            option(value='-webservice_login_date') webservice_login_date &#9660;
         div.col-sm-3
           label Limit
           select.form-control(name='limit')
@@ -56,7 +68,14 @@ block body
         tr
           th
           th email
-          th.stretch name
+          th hash
+          th access_token
+          th device_login_date
+          th is_device_login
+          th is_webservice_login
+          th last_refresh_date
+          th refresh_token
+          th webservice_login_date
           th id
       tbody#results-rows
 
@@ -65,6 +84,13 @@ block body
       input.btn.btn-default.btn-sm.btn-details(type='button', value='Edit')
     td <%- email %>
     td <%- hash %>
+    td.nowrap <%= access_token %>
+    td.nowrap <%= device_login_date %>
+    td.nowrap <%= is_device_login %>
+    td.nowrap <%= is_webservice_login %>
+    td.nowrap <%= last_refresh_date %>
+    td.nowrap <%= refresh_token %>
+    td.nowrap <%= webservice_login_date %>
     td.nowrap <%= _id %>
 
   script(type='text/template', id='tmpl-results-empty-row')

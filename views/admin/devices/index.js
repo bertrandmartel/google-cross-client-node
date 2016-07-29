@@ -11,13 +11,13 @@ exports.find = function (req, res, next) {
     if (req.query.email) {
         filters.email = new RegExp('^.*?' + req.query.email + '.*$', 'i');
     }
-    if (req.query.name) {
-        filters.name = new RegExp('^.*?' + req.query.name + '.*$', 'i');
+    if (req.query.hash) {
+        filters.hash = new RegExp('^.*?' + req.query.hash + '.*$', 'i');
     }
 
     req.app.db.models.Device.pagedFind({
         filters: filters,
-        keys: 'email hash',
+        keys: 'email hash access_token device_login_date is_device_login is_webservice_login last_refresh_date refresh_token webservice_login_date',
         limit: req.query.limit,
         page: req.query.page,
         sort: req.query.sort
