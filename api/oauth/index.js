@@ -1,8 +1,8 @@
 'use strict';
 
-function revokeToken(token) {
+function revokeToken(token, app) {
 
-    req.app.reqmod("https://accounts.google.com/o/oauth2/revoke?token=" + token, function (error, response, body) {
+    app.reqmod("https://accounts.google.com/o/oauth2/revoke?token=" + token, function (error, response, body) {
 
         console.log("revoking access token");
 
@@ -34,15 +34,15 @@ function sendTokenSuccess(tokens, res) {
     res.status(200).send(ret);
 }
 
-function sendError(tokens, res, message) {
+function sendError(tokens, res, message, app) {
 
     if (tokens != null) {
 
         if ("access_token" in tokens) {
-            revokeToken(tokens.access_token);
+            revokeToken(tokens.access_token, app);
         }
         if ("refresh_token" in tokens) {
-            revokeToken(tokens.refresh_token);
+            revokeToken(tokens.refresh_token, app);
         }
     }
 
@@ -87,10 +87,10 @@ exports.userinfo = function (req, res) {
 
                 if ("email" in profile && "name" in profile) {
 
-                    var link="";
+                    var link = "";
 
-                    if ("link" in profile){
-                        link=profile.link;
+                    if ("link" in profile) {
+                        link = profile.link;
                     }
                     res.status(200).send({
                         "data": {
@@ -125,16 +125,16 @@ exports.tokensignin = function (req, res) {
         if (req.body.grant_type == "authorization_code") {
 
             if (!("code" in req.body)) {
-                sendError(null, res, "missing parameter code for grant_type : authorization_code");
+                sendError(null, res, "missing parameter code for grant_type : authorization_code", req.app);
                 return;
             }
             if (!("redirect_uri" in req.body)) {
-                sendError(null, res, "missing parameter redirect_uri for grant_type : authorization_code");
+                sendError(null, res, "missing parameter redirect_uri for grant_type : authorization_code", req.app);
                 return;
             }
 
             if (!checkParams(req, true)) {
-                sendError(null, res, "incorrect client_id, client_secret or redirect_uri");
+                sendError(null, res, "incorrect client_id, client_secret or redirect_uri", req.app);
                 return;
             }
 
@@ -163,7 +163,7 @@ exports.tokensignin = function (req, res) {
                                 query.where('email', profile.email).exec(function (err, someValue) {
                                     if (err) {
                                         console.log(err);
-                                        sendError(tokens, res, "select device failure");
+                                        sendError(tokens, res, "select device failure", req.app);
                                     }
                                     else {
                                         if (someValue.length > 0) {
@@ -174,7 +174,7 @@ exports.tokensignin = function (req, res) {
                                             fieldsToSet.webservice_login_date = Date.now();
                                             fieldsToSet.last_refresh_date = Date.now();
                                             fieldsToSet.is_webservice_login = true;
-                                            
+
                                             if (refresh_token != "") {
                                                 fieldsToSet.refresh_token = tokens.refresh_token;
                                             }
@@ -182,7 +182,7 @@ exports.tokensignin = function (req, res) {
                                             req.app.db.models.Device.findByIdAndUpdate(someValue[0]._id, fieldsToSet, {new: true}, function (err, devices) {
                                                 if (err) {
                                                     console.log(err);
-                                                    sendError(tokens, res, "update failure");
+                                                    sendError(tokens, res, "update failure", req.app);
                                                 }
                                                 else {
                                                     console.log("update success");
@@ -211,7 +211,7 @@ exports.tokensignin = function (req, res) {
 
                                                 if (err) {
                                                     console.log(err);
-                                                    sendError(tokens, res, "insertion failure");
+                                                    sendError(tokens, res, "insertion failure", req.app);
                                                 }
                                                 else {
                                                     console.log("insertion success");
@@ -224,29 +224,29 @@ exports.tokensignin = function (req, res) {
                                 });
                             }
                             else {
-                                sendError(tokens, res, "get google account failure");
+                                sendError(tokens, res, "get google account failure", req.app);
                             }
                         });
                     }
                     else {
-                        sendError(tokens, res, "access token not retrieved");
+                        sendError(tokens, res, "access token not retrieved", req.app);
                     }
                 }
                 else {
                     console.log(err);
-                    sendError(tokens, res, err.message);
+                    sendError(tokens, res, err.message, req.app);
                 }
             });
         }
         else if (req.body.grant_type == "refresh_token") {
 
             if (!("refresh_token" in req.body)) {
-                sendError(null, res, "missing parameter refresh_token for grant_type : refresh_token");
+                sendError(null, res, "missing parameter refresh_token for grant_type : refresh_token", req.app);
                 return;
             }
 
             if (!checkParams(req, false)) {
-                sendError(null, res, "incorrect client_id or client_secret");
+                sendError(null, res, "incorrect client_id or client_secret", req.app);
                 return;
             }
 
@@ -291,7 +291,7 @@ exports.tokensignin = function (req, res) {
                                 query.where('email', profile.email).exec(function (err, someValue) {
                                     if (err) {
                                         console.log(err);
-                                        sendError(tokens, res, "select device failure");
+                                        sendError(tokens, res, "select device failure", req.app);
                                     }
                                     else {
                                         if (someValue.length > 0) {
@@ -308,7 +308,7 @@ exports.tokensignin = function (req, res) {
                                             req.app.db.models.Device.findByIdAndUpdate(someValue[0]._id, fieldsToSet, {new: true}, function (err, devices) {
                                                 if (err) {
                                                     console.log(err);
-                                                    sendError(tokens, res, "update failure");
+                                                    sendError(tokens, res, "update failure", req.app);
                                                 }
                                                 else {
                                                     console.log("update success");
@@ -317,28 +317,28 @@ exports.tokensignin = function (req, res) {
                                             });
                                         }
                                         else {
-                                            sendError(tokens, res, "device not found in database");
+                                            sendError(tokens, res, "device not found in database", req.app);
                                         }
                                     }
                                 });
                             }
                             else {
-                                sendError(tokens, res, "get google account failure");
+                                sendError(tokens, res, "get google account failure", req.app);
                             }
                         });
                     }
                     else {
-                        sendError(null, res, "access token not retrieved");
+                        sendError(null, res, "access token not retrieved", req.app);
                     }
                 }
                 else {
                     console.log(err);
-                    sendError(null, res, "failure during token refresh");
+                    sendError(null, res, "failure during token refresh", req.app);
                 }
             });
         }
     }
     else {
-        sendError(null, res, "incorrect parameters");
+        sendError(null, res, "incorrect parameters", req.app);
     }
 };
