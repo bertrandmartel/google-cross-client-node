@@ -87,7 +87,7 @@ exports.userinfo = function (req, res) {
 
                 if ("email" in profile && "name" in profile) {
 
-                    var link = "";
+                    var link = "none";
 
                     if ("link" in profile) {
                         link = profile.link;
