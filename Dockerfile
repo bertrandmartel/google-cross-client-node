@@ -1,5 +1,7 @@
 FROM node:latest
 
+MAINTAINER Bertrand Martel <bmartel.fr@gmail.com>
+
 # Create app directory
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
