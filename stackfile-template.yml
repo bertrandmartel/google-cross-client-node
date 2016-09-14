@@ -1,6 +1,5 @@
 auth-server:
   image: 'akinaru/google-cross-client'
-  command: bash -c "npm rebuild && npm start"
   restart: always
   ports:
     - "${AUTH_SERVER_PORT}:${AUTH_SERVER_PORT}"

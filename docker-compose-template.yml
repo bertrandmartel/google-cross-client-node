@@ -2,7 +2,6 @@ version: '2'
 services:
   auth-server:
     build: .
-    command: bash -c "npm rebuild && npm start"
     restart: always
     environment:
       - NODE_ENV=${NODE_ENV}
