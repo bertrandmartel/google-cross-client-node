@@ -28,6 +28,15 @@ var config = require('./config'),
     jwt = require('jsonwebtoken'),
     csrf = require('csurf');
 
+var morgan = require('morgan')
+var winston = require('winston');
+
+if (process.env.SENTRY_TOKEN_AUTH) {
+    var raven = require('raven');
+    var client = new raven.Client(process.env.SENTRY_TOKEN_AUTH);
+    client.patchGlobal();
+}
+
 //create express app
 var app = express();
 
@@ -58,7 +67,36 @@ app.config = config;
 
 // setup the logger
 //app.use(morgan(app.config.logFormat, {stream: accessLogStream}))
-app.use(require('morgan')('dev'));
+var logger = new winston.Logger({
+    transports: [
+        new winston.transports.File({
+            level: 'info',
+            filename: process.env.AUTHENT_LOG_FILE_PATH,
+            handleExceptions: true,
+            json: true,
+            maxsize: 50000000, //50MB
+            maxFiles: 1,
+            colorize: false
+        }),
+        new winston.transports.Console({
+            level: 'debug',
+            handleExceptions: true,
+            json: false,
+            colorize: true
+        })
+    ],
+    exitOnError: false
+});
+
+logger.stream = {
+    write: function(message, encoding) {
+        logger.info(message);
+    }
+};
+
+app.use(require("morgan")("combined", {
+    "stream": logger.stream
+}));
 
 // create api router
 app.api = createApiRouter(app.config, morgan, accessLogStream);

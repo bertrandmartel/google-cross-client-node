@@ -1,8 +1,8 @@
 'use strict';
 
-exports.port = process.env.PORT || 4747;
+exports.port = process.env.AUTH_SERVER_PORT || 4747;
 exports.mongodb = {
-    uri: process.env.MONGOLAB_URI || 'mongodb://localhost:27017/gcrossclient'
+    uri: process.env.MONGO_AUTH_URI || 'mongodb://localhost:27017/gcrossclient'
 };
 
 exports.httpsConfig = {
@@ -50,7 +50,7 @@ exports.api = {
 
 exports.jwt = {
     secret: process.env.JWT_SECRET || '',
-    private_key: process.env.JWT_KEY_PATH || './jwt_cert.key',
+    private_key: process.env.JWT_PRIVATE_KEY_PATH || './jwt_cert.key',
     public_key: process.env.JWT_CERT_PATH || './jwt_cert.crt'
 };
 

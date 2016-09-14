@@ -7,8 +7,8 @@ services:
     environment:
       - NODE_ENV=${NODE_ENV}
       - NPM_CONFIG_PRODUCTION=${NPM_CONFIG_PRODUCTION}
-      - PORT=${PORT}
-      - MONGOLAB_URI=${MONGOLAB_URI}
+      - AUTH_SERVER_PORT=${AUTH_SERVER_PORT}
+      - MONGO_AUTH_URI=${MONGO_AUTH_URI}
       - KEY_PATH=${KEY_PATH}
       - CERT_PATH=${CERT_PATH}
       - SYSTEM_EMAIL=${SYSTEM_EMAIL}
@@ -29,17 +29,20 @@ services:
       - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI}
       - API_VERSION=${API_VERSION}
       - JWT_SECRET=${JWT_SECRET}
-      - JWT_KEY_PATH=${JWT_KEY_PATH}
+      - JWT_PRIVATE_KEY_PATH=${JWT_PRIVATE_KEY_PATH}
       - JWT_CERT_PATH=${JWT_CERT_PATH}
       - AUTH_THIRD_PART_WEBSERVICE_URI=${AUTH_THIRD_PART_WEBSERVICE_URI}
       - AUTH_THIRD_PART_USERINFO_ENDPOINT=${AUTH_THIRD_PART_USERINFO_ENDPOINT}
       - AUTH_THRID_PART_GOOGLE_OAUTH_CORS_FILTER=${AUTH_THRID_PART_GOOGLE_OAUTH_CORS_FILTER}
+      - SENTRY_TOKEN_AUTH=${SENTRY_TOKEN_AUTH}
+      - AUTHENT_LOG_FILE_PATH=${AUTHENT_LOG_FILE_PATH}
     ports:
-      - "${PORT}:${PORT}"
+      - "${AUTH_SERVER_PORT}:${AUTH_SERVER_PORT}"
     depends_on:
       - mongodb
     volumes:
       - ./key:/etc/key
+      - ./log:/usr/src/log
   mongodb:
       image: mongo:3.2
       restart: always
