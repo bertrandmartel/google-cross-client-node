@@ -1,0 +1,51 @@
+version: '2'
+services:
+  auth-server:
+    build: .
+    command: bash -c "npm rebuild && npm start"
+    restart: always
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - NPM_CONFIG_PRODUCTION=${NPM_CONFIG_PRODUCTION}
+      - PORT=${PORT}
+      - MONGOLAB_URI=${MONGOLAB_URI}
+      - KEY_PATH=${KEY_PATH}
+      - CERT_PATH=${CERT_PATH}
+      - SYSTEM_EMAIL=${SYSTEM_EMAIL}
+      - CRYPTO_KEY=${CRYPTO_KEY}
+      - LOGIN_ATTEMPTS_FOR_IP=${LOGIN_ATTEMPTS_FOR_IP}
+      - LOGIN_ATTEMPTS_FOR_IP_AND_USER=${LOGIN_ATTEMPTS_FOR_IP_AND_USER}
+      - LOGIN_ATTEMPTS_LOG_EXPIRATION=${LOGIN_ATTEMPTS_LOG_EXPIRATION}
+      - REQUIRE_ACCOUNT_VERIFICATION=${REQUIRE_ACCOUNT_VERIFICATION}
+      - DISABLE_SIGNUP=${DISABLE_SIGNUP}
+      - SMTP_FROM_NAME=${SMTP_FROM_NAME}
+      - SMTP_FROM_ADDRESS=${SMTP_FROM_ADDRESS}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_USE_SSL=${SMTP_USE_SSL}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI}
+      - API_VERSION=${API_VERSION}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_KEY_PATH=${JWT_KEY_PATH}
+      - JWT_CERT_PATH=${JWT_CERT_PATH}
+      - AUTH_THIRD_PART_WEBSERVICE_URI=${AUTH_THIRD_PART_WEBSERVICE_URI}
+      - AUTH_THIRD_PART_USERINFO_ENDPOINT=${AUTH_THIRD_PART_USERINFO_ENDPOINT}
+      - AUTH_THRID_PART_GOOGLE_OAUTH_CORS_FILTER=${AUTH_THRID_PART_GOOGLE_OAUTH_CORS_FILTER}
+    ports:
+      - "${PORT}:${PORT}"
+    depends_on:
+      - mongodb
+    volumes:
+      - ./key:/etc/key
+  mongodb:
+      image: mongo:3.2
+      restart: always
+      container_name: mongodb_container
+      command: /bin/bash -c "chown -R mongodb /var/log/mongodb; mongod --config /etc/mongodb/mongod.conf"
+      volumes:
+       - ./mongodb/log:/var/log/mongodb
+       - ./mongodb/conf/mongod.conf:/etc/mongodb/mongod.conf
+       - ./mongodb/data:/var/lib/mongodb

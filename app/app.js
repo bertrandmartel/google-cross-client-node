@@ -56,6 +56,20 @@ var accessLogStream = FileStreamRotator.getStream({
 
 app.config = config;
 
+exports.systemEmail = process.env.SYSTEM_EMAIL || 'your@email.addy';
+exports.smtp = {
+    from: {
+        name: process.env.SMTP_FROM_NAME || exports.projectName + ' Website',
+        address: process.env.SMTP_FROM_ADDRESS || 'your@email.addy'
+    },
+    credentials: {
+        user: process.env.SMTP_USERNAME || 'your@email.addy',
+        password: process.env.SMTP_PASSWORD || 'bl4rg!',
+        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        ssl: process.env.SMTP_USE_SSL || true
+    }
+};
+
 // setup the logger
 //app.use(morgan(app.config.logFormat, {stream: accessLogStream}))
 app.use(require('morgan')('dev'));

@@ -1,6 +1,6 @@
 # Google Cross Client - Node JS
 
-Node JS server part authenticating Android clients with google signin compliant with <a href="https://developers.google.com/identity/protocols/CrossClientAuth">google standards</a>
+Node JS server authenticating Android clients with google signin compliant with <a href="https://developers.google.com/identity/protocols/CrossClientAuth">google standards</a>
 
 Android devices will send their device serial + google JWT token to this server which will check google authentication, check device serial from a whitelist and store email/serial in database
 
@@ -79,6 +79,8 @@ exports.authentication_thirdpart = {
 * create your admin in mongo database : 
 
 ```
+use gcrossclient
+
 db.admingroups.insert({ _id: 'root', name: 'Root' });
 db.admins.insert({ name: {first: 'Root', last: 'Admin', full: 'Root Admin'}, groups: ['root'] });
 var rootAdmin = db.admins.findOne();
@@ -91,6 +93,7 @@ db.admins.save(rootAdmin);
 * install & start
 
 ```
+cd app
 npm install
 npm start
 ```
@@ -209,6 +212,53 @@ To encode JWT :
 var cert2 = fs.readFileSync(config.jwt.private_key);
 var token = jwt.sign(config.jwt.secret, cert2, {algorithm: 'HS512'});
 console.log(token);
+```
+
+## Docker
+
+### Docker-compose
+
+* complete `vars-template.sh` file with your own configuration
+
+* place your SSL server key & your JWT keys in a `key` folder
+
+then :
+```
+source vars-template.sh
+envsubst < docker-compose-template.yml > docker-compose.yml
+docker-compose up
+```
+
+### Docker-cloud
+
+```
+export USER_PATH=/home/bobby
+source vars-template.sh
+envsubst < stackfile-template.yml > stackfile.yml
+```
+
+* revise your `stackfile.yml` file before creating/updating the stack :
+
+```
+# create the stack :
+
+docker-cloud stack create --name authentication-server -f stackfile.yml
+
+# or update :
+
+docker-cloud stack update -f stackfile.yml <uuid>
+```
+
+* start/deploy :
+
+```
+# start the stack :
+
+docker-cloud stack start <uuid>
+
+# or redeploy :
+
+docker-cloud stack redeploy <uuid>
 ```
 
 ## License
