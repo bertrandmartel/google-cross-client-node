@@ -12,6 +12,7 @@ RUN npm install -g pm2
 # Install app dependencies
 COPY app/package.json /usr/src/app/
 RUN npm install
+RUN npm rebuild
 
 # Bundle app source
 COPY ./app /usr/src/app
