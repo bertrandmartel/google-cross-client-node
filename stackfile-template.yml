@@ -6,7 +6,7 @@ auth-server:
   depends_on:
     - mongodb
   volumes:
-    - ${USER_PATH}/auth-server/key:/etc/key
+    - ${USER_PATH}/key:/etc/key
     - ${USER_PATH}/log:/usr/src/log
   environment:
     - NODE_ENV=${NODE_ENV}
