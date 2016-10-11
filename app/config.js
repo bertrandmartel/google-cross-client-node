@@ -5,9 +5,16 @@ exports.mongodb = {
     uri: process.env.MONGO_AUTH_URI || 'mongodb://localhost:27017/gcrossclient'
 };
 
+exports.baseUrl = "/service";
+
 exports.httpsConfig = {
     key: process.env.KEY_PATH || './server.key',
     pem: process.env.CERT_PATH || './server.crt'
+}
+
+exports.welcomeMessage = {
+    subject: "Welcome to this amazing service",
+    bodyFilePath: "body-welcome-email"
 }
 
 exports.logFormat = ":remote-addr - :remote-user [:date[iso]] \":method :url HTTP/:http-version\" :status :res[content-length] [:user-agent]"

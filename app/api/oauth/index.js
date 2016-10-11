@@ -2,14 +2,13 @@
 
 function revokeToken(token, app) {
 
-    app.reqmod("https://accounts.google.com/o/oauth2/revoke?token=" + token, function (error, response, body) {
+    app.reqmod("https://accounts.google.com/o/oauth2/revoke?token=" + token, function(error, response, body) {
 
         console.log("revoking access token");
 
         if (error) {
             console.log(error);
-        }
-        else {
+        } else {
             console.log(body);
         }
     });
@@ -47,11 +46,9 @@ function sendError(tokens, res, message, app) {
     }
 
     res.status(401).send({
-        "errors": [
-            {
-                "message": message
-            }
-        ]
+        "errors": [{
+            "message": message
+        }]
     });
 }
 
@@ -69,7 +66,7 @@ function checkParams(req, check_redirect) {
     return true;
 }
 
-exports.userinfo = function (req, res) {
+exports.userinfo = function(req, res) {
 
     var authorization = req.headers['authorization'];
 
@@ -83,7 +80,7 @@ exports.userinfo = function (req, res) {
                 "access_token": items[1].trim()
             });
 
-            req.app.google.oauth2("v2").userinfo.v2.me.get({auth: req.app.oauth2Client}, function (e, profile) {
+            req.app.google.oauth2("v2").userinfo.v2.me.get({ auth: req.app.oauth2Client }, function(e, profile) {
 
                 if ("email" in profile && "name" in profile) {
 
@@ -99,14 +96,11 @@ exports.userinfo = function (req, res) {
                             "url": link
                         }
                     });
-                }
-                else {
+                } else {
                     res.status(500).send({
-                        "errors": [
-                            {
-                                "message": "user info failure"
-                            }
-                        ]
+                        "errors": [{
+                            "message": "user info failure"
+                        }]
                     });
                 }
             })
@@ -114,7 +108,7 @@ exports.userinfo = function (req, res) {
     }
 }
 
-exports.tokensignin = function (req, res) {
+exports.tokensignin = function(req, res) {
 
     console.log("in tokensignin");
     console.log(req.body);
@@ -138,7 +132,7 @@ exports.tokensignin = function (req, res) {
                 return;
             }
 
-            req.app.oauth2Client.getToken(req.body.code, function (err, tokens) {
+            req.app.oauth2Client.getToken(req.body.code, function(err, tokens) {
                 // Now tokens contains an access_token and an optional refresh_token. Save them.
                 if (!err) {
                     if ("access_token" in tokens) {
@@ -152,7 +146,7 @@ exports.tokensignin = function (req, res) {
                         console.log(tokens);
                         req.app.oauth2Client.setCredentials(tokens);
 
-                        req.app.google.oauth2("v2").userinfo.v2.me.get({auth: req.app.oauth2Client}, function (e, profile) {
+                        req.app.google.oauth2("v2").userinfo.v2.me.get({ auth: req.app.oauth2Client }, function(e, profile) {
 
                             if ("email" in profile) {
 
@@ -160,12 +154,11 @@ exports.tokensignin = function (req, res) {
 
                                 var query = req.app.db.models.Device.find({}).select('email _id');
 
-                                query.where('email', profile.email).exec(function (err, someValue) {
+                                query.where('email', profile.email).exec(function(err, someValue) {
                                     if (err) {
                                         console.log(err);
                                         sendError(tokens, res, "select device failure", req.app);
-                                    }
-                                    else {
+                                    } else {
                                         if (someValue.length > 0) {
                                             console.log("updating device with id  : " + someValue[0]._id);
 
@@ -179,18 +172,16 @@ exports.tokensignin = function (req, res) {
                                                 fieldsToSet.refresh_token = tokens.refresh_token;
                                             }
 
-                                            req.app.db.models.Device.findByIdAndUpdate(someValue[0]._id, fieldsToSet, {new: true}, function (err, devices) {
+                                            req.app.db.models.Device.findByIdAndUpdate(someValue[0]._id, fieldsToSet, { new: true }, function(err, devices) {
                                                 if (err) {
                                                     console.log(err);
                                                     sendError(tokens, res, "update failure", req.app);
-                                                }
-                                                else {
+                                                } else {
                                                     console.log("update success");
                                                     sendTokenSuccess(tokens, res);
                                                 }
                                             });
-                                        }
-                                        else {
+                                        } else {
 
                                             console.log("inserting device");
                                             var current_date = (new Date()).valueOf().toString();
@@ -207,13 +198,12 @@ exports.tokensignin = function (req, res) {
                                                 refresh_token: refresh_token,
                                                 last_refresh_date: Date.now(),
                                                 webservice_login_date: Date.now()
-                                            }, function (err, devices) {
+                                            }, function(err, devices) {
 
                                                 if (err) {
                                                     console.log(err);
                                                     sendError(tokens, res, "insertion failure", req.app);
-                                                }
-                                                else {
+                                                } else {
                                                     console.log("insertion success");
                                                     sendTokenSuccess(tokens, res);
                                                 }
@@ -222,23 +212,19 @@ exports.tokensignin = function (req, res) {
                                         }
                                     }
                                 });
-                            }
-                            else {
+                            } else {
                                 sendError(tokens, res, "get google account failure", req.app);
                             }
                         });
-                    }
-                    else {
+                    } else {
                         sendError(tokens, res, "access token not retrieved", req.app);
                     }
-                }
-                else {
+                } else {
                     console.log(err);
                     sendError(tokens, res, err.message, req.app);
                 }
             });
-        }
-        else if (req.body.grant_type == "refresh_token") {
+        } else if (req.body.grant_type == "refresh_token") {
 
             if (!("refresh_token" in req.body)) {
                 sendError(null, res, "missing parameter refresh_token for grant_type : refresh_token", req.app);
@@ -254,7 +240,7 @@ exports.tokensignin = function (req, res) {
                 "refresh_token": req.body.refresh_token
             });
 
-            req.app.oauth2Client.refreshAccessToken(function (err, tokens) {
+            req.app.oauth2Client.refreshAccessToken(function(err, tokens) {
 
                 if (!err) {
                     if ("access_token" in tokens) {
@@ -280,7 +266,7 @@ exports.tokensignin = function (req, res) {
                         }
                         req.app.oauth2Client.setCredentials(tokens);
 
-                        req.app.google.oauth2("v2").userinfo.v2.me.get({auth: req.app.oauth2Client}, function (e, profile) {
+                        req.app.google.oauth2("v2").userinfo.v2.me.get({ auth: req.app.oauth2Client }, function(e, profile) {
 
                             if ("email" in profile) {
 
@@ -288,12 +274,11 @@ exports.tokensignin = function (req, res) {
 
                                 var query = req.app.db.models.Device.find({}).select('email _id');
 
-                                query.where('email', profile.email).exec(function (err, someValue) {
+                                query.where('email', profile.email).exec(function(err, someValue) {
                                     if (err) {
                                         console.log(err);
                                         sendError(tokens, res, "select device failure", req.app);
-                                    }
-                                    else {
+                                    } else {
                                         if (someValue.length > 0) {
                                             console.log("updating device with id  : " + someValue[0]._id);
 
@@ -305,40 +290,34 @@ exports.tokensignin = function (req, res) {
                                                 fieldsToSet.refresh_token = tokens.refresh_token;
                                             }
 
-                                            req.app.db.models.Device.findByIdAndUpdate(someValue[0]._id, fieldsToSet, {new: true}, function (err, devices) {
+                                            req.app.db.models.Device.findByIdAndUpdate(someValue[0]._id, fieldsToSet, { new: true }, function(err, devices) {
                                                 if (err) {
                                                     console.log(err);
                                                     sendError(tokens, res, "update failure", req.app);
-                                                }
-                                                else {
+                                                } else {
                                                     console.log("update success");
                                                     sendRefreshSuccess(fieldsToSet.access_token, fieldsToSet.refresh_token, res);
                                                 }
                                             });
-                                        }
-                                        else {
+                                        } else {
                                             sendError(tokens, res, "device not found in database", req.app);
                                         }
                                     }
                                 });
-                            }
-                            else {
+                            } else {
                                 sendError(tokens, res, "get google account failure", req.app);
                             }
                         });
-                    }
-                    else {
+                    } else {
                         sendError(null, res, "access token not retrieved", req.app);
                     }
-                }
-                else {
+                } else {
                     console.log(err);
                     sendError(null, res, "failure during token refresh", req.app);
                 }
             });
         }
-    }
-    else {
+    } else {
         sendError(null, res, "incorrect parameters", req.app);
     }
 };

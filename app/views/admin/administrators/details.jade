@@ -4,10 +4,10 @@ block head
   title Administrators / Details
 
 block neck
-  link(rel='stylesheet', href='/views/admin/administrators/details.min.css?#{cacheBreaker}')
+  link(rel='stylesheet', href='#{baseUrl}/views/admin/administrators/details.min.css?#{cacheBreaker}')
 
 block feet
-  script(src='/views/admin/administrators/details.min.js?#{cacheBreaker}')
+  script(src='#{baseUrl}/views/admin/administrators/details.min.js?#{cacheBreaker}')
 
 block body
   div.row
@@ -22,7 +22,7 @@ block body
   script(type='text/template', id='tmpl-header')
     div.page-header
       h1
-        a(href='/admin/administrators/') Administrators
+        a(href='#{baseUrl}/admin/administrators/') Administrators
         |  / <%- name.full %>
 
   script(type='text/template', id='tmpl-details')

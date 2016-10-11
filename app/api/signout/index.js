@@ -1,11 +1,11 @@
 'use strict';
 
-exports.init = function (req, res) {
+exports.init = function(req, res) {
 
     var workflow = req.app.utility.workflow(req, res);
 
     //validate message format
-    workflow.on('validate_signout', function () {
+    workflow.on('validate_signout', function() {
 
         if (!req.body.token) {
 
@@ -32,11 +32,11 @@ exports.init = function (req, res) {
     });
 
     //verify token
-    workflow.on('verifier_signout', function () {
+    workflow.on('verifier_signout', function() {
 
         console.log("find token : " + req.body.token);
 
-        req.app.reqmod('https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' + req.body.token, function (error, response, body) {
+        req.app.reqmod('https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' + req.body.token, function(error, response, body) {
 
             if (error) {
                 console.log(error);
@@ -62,8 +62,7 @@ exports.init = function (req, res) {
                     };
                     return workflow.emit('api_response');
                 }
-            }
-            catch (e) {
+            } catch (e) {
 
                 workflow.outcome = {};
                 workflow.outcome.response = {
@@ -78,9 +77,9 @@ exports.init = function (req, res) {
     });
 
     //check for duplicates in database
-    workflow.on('signout', function () {
+    workflow.on('signout', function() {
 
-        req.app.db.models.Device.findOneAndRemove({email: req.email}, function (err) {
+        req.app.db.models.Device.findOneAndRemove({ email: req.email }, function(err) {
             if (err) {
                 workflow.outcome = {};
                 workflow.outcome.response = {

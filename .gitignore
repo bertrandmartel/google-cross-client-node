@@ -14,3 +14,4 @@
 docker-compose.yml
 stackfile.yml
 vars.sh
+/app/body-welcome-email*

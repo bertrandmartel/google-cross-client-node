@@ -4,7 +4,7 @@ block head
   title Users / Details
 
 block feet
-  script(src='/views/admin/users/details.min.js?#{cacheBreaker}')
+  script(src='#{baseUrl}/views/admin/users/details.min.js?#{cacheBreaker}')
 
 block body
   div.row
@@ -18,7 +18,7 @@ block body
   script(type='text/template', id='tmpl-header')
     div.page-header
       h1
-        a(href='/admin/users/') Users
+        a(href='#{baseUrl}/admin/users/') Users
         |  / <%= username %>
 
   script(type='text/template', id='tmpl-identity')
