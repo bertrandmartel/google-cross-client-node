@@ -3,15 +3,13 @@
 function sendError(res, message) {
 
     res.status(401).send({
-        "errors": [
-            {
-                "message": message
-            }
-        ]
+        "errors": [{
+            "message": message
+        }]
     });
 }
 
-module.exports = function (req, res, next) {
+module.exports = function(req, res, next) {
 
     var authorization = req.headers['authorization'];
 
@@ -21,12 +19,11 @@ module.exports = function (req, res, next) {
 
         if (items.length > 1 && items[0].trim() == "Bearer") {
 
-            req.app.reqmod('https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=' + items[1].trim(), function (error, response, body) {
+            req.app.reqmod('https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=' + items[1].trim(), function(error, response, body) {
 
                 if (error) {
                     sendError(res, "verification request error");
-                }
-                else {
+                } else {
                     try {
                         if (response.statusCode == 200) {
 
@@ -34,37 +31,31 @@ module.exports = function (req, res, next) {
 
                             var query = req.app.db.models.Device.find({}).select('access_token -_id');
 
-                            query.where('access_token', items[1].trim()).exec(function (err, someValue) {
+                            query.where('access_token', items[1].trim()).exec(function(err, someValue) {
                                 if (err) {
                                     sendError(res, "check database failure");
-                                }
-                                else {
+                                } else {
                                     console.log(someValue);
                                     if (someValue.length > 0) {
                                         console.log("success");
                                         next();
-                                    }
-                                    else {
+                                    } else {
                                         sendError(res, "not authorized");
                                     }
                                 }
                             });
-                        }
-                        else {
+                        } else {
                             sendError(res, "bad token");
                         }
-                    }
-                    catch (e) {
+                    } catch (e) {
                         sendError(res, "request format error");
                     }
                 }
             });
-        }
-        else {
+        } else {
             sendError(res, "bad authorization protocol");
         }
-    }
-    else {
+    } else {
         sendError(res, "not authorized");
     }
 

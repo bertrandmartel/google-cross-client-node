@@ -4,7 +4,7 @@ block head
   title Whitelist / Details
 
 block feet
-  script(src='/views/admin/whitelist/details.min.js?#{cacheBreaker}')
+  script(src='#{baseUrl}/views/admin/whitelist/details.min.js?#{cacheBreaker}')
 
 block body
   div.row
@@ -16,7 +16,7 @@ block body
   script(type='text/template', id='tmpl-header')
     div.page-header
       h1
-        a(href='/admin/whitelist/') Whitelist
+        a(href='#{baseUrl}/admin/whitelist/') Whitelist
         |  / <%- name %>
 
   script(type='text/template', id='tmpl-details')

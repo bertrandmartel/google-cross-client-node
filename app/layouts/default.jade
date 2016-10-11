@@ -1,17 +1,19 @@
+script.
+    baseUrl = "#{baseUrl}";
 doctype html
 html
   head
     block head
       title #{title}
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
-    link(rel='stylesheet', href='/layouts/core.min.css?#{cacheBreaker}')
+    link(rel='stylesheet', href='#{baseUrl}/layouts/core.min.css?#{cacheBreaker}')
     block neck
   body
     div.navbar.navbar-default.navbar-fixed-top
       div.container
         div.navbar-header
-          a.navbar-brand(href='/admin')
-            img.navbar-logo(src='/media/logo-symbol-64x64.png', alt='Logo')
+          a.navbar-brand(href='#{baseUrl}/admin')
+            img.navbar-logo(src='#{baseUrl}/media/logo-symbol-64x64.png', alt='Logo')
             span.navbar-brand-label #{projectName}
           button.navbar-toggle.collapsed(data-toggle='collapse', data-target='.my-navbar-collapse')
             span.icon-bar
@@ -19,17 +21,17 @@ html
             span.icon-bar
         div.navbar-collapse.my-navbar-collapse.collapse
           ul.nav.navbar-nav
-            //li: a(href='/admin') Home
-            //li: a(href='/about/') About
-            //li: a(href='/signup/') Sign Up
-            //li: a(href='/contact/') Contact
+            //li: a(href='#{baseUrl}/admin') Home
+            //li: a(href='#{baseUrl}/about/') About
+            //li: a(href='#{baseUrl}/signup/') Sign Up
+            //li: a(href='#{baseUrl}/contact/') Contact
           ul.nav.navbar-nav.navbar-right
             if user && user.username
               li: a(href='#{user.defaultReturnUrl}')
                 i.fa.fa-user
                 |  #{user.username}
             else
-              li: a(href='/login/')
+              li: a(href='#{baseUrl}/login/')
                 i.fa.fa-user
                 |  Sign In
 
@@ -42,14 +44,14 @@ html
         span.copyright.pull-right
           |&#169; #{copyrightYear} #{copyrightName}
         ul.links
-          li: a(href='/admin') Home
+          li: a(href='#{baseUrl}/admin') Home
         div.clearfix
 
     div.ajax-spinner
-      img(src='/media/ajax-pulse.gif', alt='Loading')
+      img(src='#{baseUrl}/media/ajax-pulse.gif', alt='Loading')
 
     //if lte IE 9
-      script(src='/layouts/ie-sucks.min.js?#{cacheBreaker}')
-    script(src='/layouts/core.min.js?#{cacheBreaker}')
+      script(src='#{baseUrl}/layouts/ie-sucks.min.js?#{cacheBreaker}')
+    script(src='#{baseUrl}/layouts/core.min.js?#{cacheBreaker}')
 
     block feet

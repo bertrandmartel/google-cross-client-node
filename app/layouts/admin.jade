@@ -1,18 +1,20 @@
+script.
+    baseUrl = "#{baseUrl}";
 doctype html
 html
   head
     block head
       title #{title}
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
-    link(rel='stylesheet', href='/layouts/core.min.css?#{cacheBreaker}')
-    link(rel='stylesheet', href='/layouts/admin.min.css?#{cacheBreaker}')
+    link(rel='stylesheet', href='#{baseUrl}/layouts/core.min.css?#{cacheBreaker}')
+    link(rel='stylesheet', href='#{baseUrl}/layouts/admin.min.css?#{cacheBreaker}')
     block neck
   body
     div.navbar.navbar-inverse.navbar-fixed-top
       div.container
         div.navbar-header
-          a.navbar-brand(href='/admin/')
-            img.navbar-logo(src='/media/logo-symbol-64x64.png', alt='Logo')
+          a.navbar-brand(href='#{baseUrl}/admin/')
+            img.navbar-logo(src='#{baseUrl}/media/logo-symbol-64x64.png', alt='Logo')
             span.navbar-brand-label #{projectName}
           button.navbar-toggle.collapsed(data-toggle='collapse', data-target='.my-navbar-collapse')
             span.icon-bar
@@ -26,13 +28,13 @@ html
                 span.caret
               ul.dropdown-menu
                 li.dropdown-header Database elements
-                li: a(href='/admin/devices/') Devices
-                li: a(href='/admin/whitelist/') Whitelist
+                li: a(href='#{baseUrl}/admin/devices/') Devices
+                li: a(href='#{baseUrl}/admin/whitelist/') Whitelist
                 li.divider
                 li.dropdown-header User Admin
-                li: a(href='/admin/users/') Users
-                li: a(href='/admin/administrators/') Administrators
-                li: a(href='/admin/admin-groups/') Admin Groups
+                li: a(href='#{baseUrl}/admin/users/') Users
+                li: a(href='#{baseUrl}/admin/administrators/') Administrators
+                li: a(href='#{baseUrl}/admin/admin-groups/') Admin Groups
 
     div.page
       div.container
@@ -44,12 +46,12 @@ html
           span.copyright.pull-right
             |&#169; #{copyrightYear} #{copyrightName}
           ul.links
-            li: a(href='/admin') Home
-            li: a(href='/logout/') Sign Out
+            li: a(href='#{baseUrl}/admin') Home
+            li: a(href='#{baseUrl}/logout/') Sign Out
           div.clearfix
 
     div.ajax-spinner
-      img(src='/media/ajax-pulse.gif', alt='Loading')
+      img(src='#{baseUrl}/media/ajax-pulse.gif', alt='Loading')
 
     script(type='text/template', id='tmpl-_search')
       div.dropdown
@@ -65,8 +67,8 @@ html
       li.dropdown-header no docs matched
 
     //if lte IE 9
-      script(src='/layouts/ie-sucks.min.js?#{cacheBreaker}')
-    script(src='/layouts/core.min.js?#{cacheBreaker}')
-    script(src='/layouts/admin.min.js?#{cacheBreaker}')
+      script(src='#{baseUrl}/layouts/ie-sucks.min.js?#{cacheBreaker}')
+    script(src='#{baseUrl}/layouts/core.min.js?#{cacheBreaker}')
+    script(src='#{baseUrl}/layouts/admin.min.js?#{cacheBreaker}')
 
     block feet

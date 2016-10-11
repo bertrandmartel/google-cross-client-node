@@ -101,8 +101,10 @@ app.use(require("morgan")("combined", {
 // create api router
 app.api = createApiRouter(app.config, morgan, accessLogStream);
 
+console.log("api : " + app.config.baseUrl + '/api/v' + app.config.api.version);
+
 // mount api before csrf is appended to the app stack
-app.use('/api/v' + app.config.api.version, app.api);
+app.use(app.config.baseUrl + '/api/v' + app.config.api.version, app.api);
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Avoids DEPTH_ZERO_SELF_SIGNED_CERT error for self-signed certs
 
@@ -116,15 +118,14 @@ if (("httpsConfig" in config) && ("key" in config.httpsConfig) && ("pem" in conf
         cert: fs.readFileSync(config.httpsConfig.pem)
     }, app);
     protocol = 'https';
-}
-else {
+} else {
     server = http.createServer(app);
 }
 
 //setup mongoose
 app.db = mongoose.createConnection(config.mongodb.uri);
 app.db.on('error', console.error.bind(console, 'mongoose connection error: '));
-app.db.once('open', function () {
+app.db.once('open', function() {
     //and... we have a data store
 });
 
@@ -139,7 +140,7 @@ app.set('view engine', 'jade');
 
 //middleware
 app.use(require('compression')());
-app.use(require('serve-static')(path.join(__dirname, 'public')));
+app.use(app.config.baseUrl, require('serve-static')(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({
     extended: true
 }));
@@ -163,7 +164,7 @@ app.use(csrf({
 helmet(app);
 
 //response locals
-app.use(function (req, res, next) {
+app.use(function(req, res, next) {
     res.cookie('_csrfToken', req.csrfToken());
     res.locals.user = {};
     res.locals.user.defaultReturnUrl = req.user && req.user.defaultReturnUrl();
@@ -175,6 +176,7 @@ app.use(function (req, res, next) {
 app.locals.projectName = app.config.projectName;
 app.locals.copyrightYear = new Date().getFullYear();
 app.locals.copyrightName = app.config.companyName;
+app.locals.baseUrl = app.config.baseUrl
 
 //setup passport
 require('./passport')(app, passport);
@@ -193,7 +195,7 @@ app.utility.slugify = require('./util/slugify');
 app.utility.workflow = require('./util/workflow');
 
 // launch listening loop
-server.listen(app.get('port'), function () {
+server.listen(app.get('port'), function() {
 
     console.log("Server listening at " + protocol + "://%s:%s", server.address().address, server.address().port)
 
@@ -210,7 +212,7 @@ function createApiRouter(config, morgan, accessLogStream) {
     router.app = app;
 
     if ("jwt" in app.config && "secret" in app.config.jwt && "private_key" in app.config.jwt) {
-        router.all('/oauth/ext/*', [require('./middlewares/jwtcors')]);
+        router.all(app.config.baseUrl + '/oauth/ext/*', [require('./middlewares/jwtcors')]);
     } else {
         console.log("jwt not specified in configuration");
     }
@@ -218,7 +220,7 @@ function createApiRouter(config, morgan, accessLogStream) {
     //router.use(morgan(config.logFormat, {stream: accessLogStream}))
 
     //setup routes
-    require('./apiRoutes')(router);
+    require('./apiRoutes')(router, app);
 
     return router
 }
@@ -227,8 +229,7 @@ function fileExists(path) {
 
     try {
         return fs.statSync(path).isFile();
-    }
-    catch (e) {
+    } catch (e) {
 
         if (e.code == 'ENOENT') { // no such file or directory. File really does not exist
             console.log("File does not exist.");
