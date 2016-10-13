@@ -57,14 +57,18 @@
         }
     });
 
-    var baseApi = baseUrl + 'login/reset/';
-    var tokenApi = baseUrl + 'login/reset/:email/:token/';
+    var routeJson = {};
+    var baseUrlStrip = baseUrl;
+
+    if (baseUrl) {
+        baseUrlStrip = baseUrlStrip.substring(1);
+    }
+
+    routeJson[baseUrlStrip + '/login/reset/'] = 'start';
+    routeJson[baseUrlStrip + '/login/reset/:email/:token/'] = 'start';
 
     app.Router = Backbone.Router.extend({
-        routes: {
-            baseApi: 'start',
-            tokenApi: 'start'
-        },
+        routes: routeJson,
         start: function(email, token) {
             app.resetView = new app.ResetView({ model: new app.Reset({ id: token, email: email }) });
         }
