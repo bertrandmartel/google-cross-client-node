@@ -1,6 +1,6 @@
 'use strict';
 
-exports = module.exports = function(app, mongoose) {
+exports = module.exports = function(app, mongoose, baseUrl) {
   var userSchema = new mongoose.Schema({
     username: { type: String, unique: true },
     password: String,
@@ -34,11 +34,11 @@ exports = module.exports = function(app, mongoose) {
   userSchema.methods.defaultReturnUrl = function() {
     var returnUrl = '/';
     if (this.canPlayRoleOf('account')) {
-      returnUrl = '/account/';
+      returnUrl = baseUrl + '/account/';
     }
 
     if (this.canPlayRoleOf('admin')) {
-      returnUrl = '/admin/';
+      returnUrl = baseUrl + '/admin/';
     }
 
     return returnUrl;

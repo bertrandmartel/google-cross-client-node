@@ -64,6 +64,7 @@ var accessLogStream = FileStreamRotator.getStream({
 })
 
 app.config = config;
+app.locals.baseUrl = app.config.baseUrl;
 
 // setup the logger
 //app.use(morgan(app.config.logFormat, {stream: accessLogStream}))
@@ -176,7 +177,6 @@ app.use(function(req, res, next) {
 app.locals.projectName = app.config.projectName;
 app.locals.copyrightYear = new Date().getFullYear();
 app.locals.copyrightName = app.config.companyName;
-app.locals.baseUrl = app.config.baseUrl
 
 //setup passport
 require('./passport')(app, passport);
