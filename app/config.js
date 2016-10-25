@@ -5,7 +5,7 @@ exports.mongodb = {
     uri: process.env.MONGO_AUTH_URI || 'mongodb://localhost:27017/gcrossclient'
 };
 
-exports.baseUrl = "/service";
+exports.baseUrl = process.env.AUTH_SERVER_PREFIX || '/service';
 
 exports.httpsConfig = {
     key: process.env.KEY_PATH || './server.key',
