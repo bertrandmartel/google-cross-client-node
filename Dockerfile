@@ -11,8 +11,6 @@ RUN npm install -g pm2
 
 # Install app dependencies
 COPY app/package.json /usr/src/app/
-RUN npm install
-RUN npm rebuild
 
 # Bundle app source
 COPY ./app /usr/src/app
@@ -20,5 +18,4 @@ COPY ./app /usr/src/app
 ADD start.sh /var/www/
 RUN chmod +x /var/www/start.sh
 
-EXPOSE 4747
 CMD ["/var/www/start.sh"] 
