@@ -31,3 +31,4 @@ export SENTRY_TOKEN_AUTH=https://XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 export AUTHENT_LOG_FILE_PATH=/usr/src/log/authentication-server.log
 export USER_PATH=/home/user
 export AUTH_SERVER_PREFIX=/service
+export AUTH_SERVER_HOST=your-host

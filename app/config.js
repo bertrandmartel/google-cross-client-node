@@ -7,6 +7,8 @@ exports.mongodb = {
 
 exports.baseUrl = process.env.AUTH_SERVER_PREFIX || '/service';
 
+exports.host = process.env.AUTH_SERVER_HOST || 'your-host';
+
 exports.httpsConfig = {
     key: process.env.KEY_PATH || './server.key',
     pem: process.env.CERT_PATH || './server.crt'
