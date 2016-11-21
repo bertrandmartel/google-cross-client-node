@@ -14,5 +14,12 @@
 docker-compose.yml
 stackfile.yml
 vars.sh
-/app/body-welcome-email*
-/app/log
+app/body-welcome-email*
+app/log
+app/.idea/workspace.xml
+app/.idea/libraries
+app/.DS_Store
+.idea/libraries
+.idea/workspace.xml
+.DS_Store
+
