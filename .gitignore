@@ -22,4 +22,4 @@ app/.DS_Store
 .idea/libraries
 .idea/workspace.xml
 .DS_Store
-
+app/build
