@@ -8,24 +8,11 @@ exports.init = function (req, res) {
     workflow.on('validate', function () {
 
         if (!req.body.token) {
-
-            workflow.outcome = {};
-            workflow.outcome.response = {
-                "status": 2,
-                "eventCode": 3,
-                "message": "token is required"
-            };
-            return workflow.emit('api_response');
+            return sendResponse(workflow, 1, 0, {}, [{"code": 0, "message": "token is required"}]);
         }
 
         if (!req.body.hash) {
-            workflow.outcome = {};
-            workflow.outcome.response = {
-                "status": 2,
-                "eventCode": 4,
-                "message": "hash is required"
-            };
-            return workflow.emit('api_response');
+            return sendResponse(workflow, 1, 0, {}, [{"code": 0, "message": "hash is required"}]);
         }
 
         workflow.emit('checkwhitelist');
@@ -81,13 +68,7 @@ exports.init = function (req, res) {
             if (match) {
                 workflow.emit('verifier');
             } else {
-                workflow.outcome = {};
-                workflow.outcome.response = {
-                    "status": 2,
-                    "eventCode": 9,
-                    "message": "device not authorized"
-                };
-                return workflow.emit('api_response');
+                return sendResponse(workflow, 1, 0, {}, [{"code": 5, "message": "device not authorized"}]);
             }
         });
     });
@@ -99,13 +80,7 @@ exports.init = function (req, res) {
 
             if (error) {
                 console.log(error);
-                workflow.outcome = {};
-                workflow.outcome.response = {
-                    "status": 2,
-                    "eventCode": 7,
-                    "message": "verification request error"
-                };
-                return workflow.emit('api_response');
+                return sendResponse(workflow, 1, 0, {}, [{"code": 3, "message": "verification failure : " + error}]);
             }
             try {
                 var bodyJson = JSON.parse(body);
@@ -113,23 +88,10 @@ exports.init = function (req, res) {
                     req.email = bodyJson.email;
                     workflow.emit('duplicatedevicesCheck');
                 } else {
-                    workflow.outcome = {};
-                    workflow.outcome.response = {
-                        "status": 2,
-                        "eventCode": 6,
-                        "message": "verification failure"
-                    };
-                    return workflow.emit('api_response');
+                    return sendResponse(workflow, 1, 0, {}, [{"code": 3, "message": "verification failure (format)"}]);
                 }
             } catch (e) {
-
-                workflow.outcome = {};
-                workflow.outcome.response = {
-                    "status": 2,
-                    "eventCode": 7,
-                    "message": "request format error"
-                };
-                return workflow.emit('api_response');
+                return sendResponse(workflow, 1, 0, {}, [{"code": 7, "message": "request format error : " + e}]);
             }
         });
     });
@@ -153,24 +115,12 @@ exports.init = function (req, res) {
 
             query.where('email', req.email).exec(function (err, someValue) {
                 if (err) {
-                    workflow.outcome = {};
-                    workflow.outcome.response = {
-                        "status": 2,
-                        "eventCode": 5,
-                        "message": err
-                    };
-                    workflow.emit('api_response');
+                    sendResponse(workflow, 1, 0, {}, [{"code": 2, "message": "database error : " + err}]);
                 } else {
                     if (someValue.length > 0) {
 
                         if (!(someValue[0].hash == req.body.hash) && !(someValue[0].hash == "")) {
-                            workflow.outcome = {};
-                            workflow.outcome.response = {
-                                "status": 2,
-                                "eventCode": 10,
-                                "message": "duplicate device"
-                            };
-                            workflow.emit('api_response');
+                            sendResponse(workflow, 1, 0, {}, [{"code": 6, "message": "duplicate device"}]);
                         } else {
 
                             var fieldsToSet = {};
@@ -180,23 +130,13 @@ exports.init = function (req, res) {
 
                             req.app.db.models.Device.findByIdAndUpdate(someValue[0]._id, fieldsToSet, {new: true}, function (err, devices) {
                                 if (err) {
-                                    workflow.outcome = {};
-                                    workflow.outcome.response = {
-                                        "status": 2,
-                                        "eventCode": 5,
-                                        "message": err
-                                    };
-                                    workflow.emit('api_response');
+                                    sendResponse(workflow, 1, 0, {}, [{
+                                        "code": 2,
+                                        "message": "database error : " + err
+                                    }]);
                                 } else {
                                     console.log("update success");
-                                    workflow.outcome = {};
-                                    workflow.outcome.response = {
-                                        "status": 1,
-                                        "eventCode": 2,
-                                        "deviceId": someValue[0]._id,
-                                        "message": "registration success. Already registered"
-                                    };
-                                    workflow.emit('api_response');
+                                    sendResponse(workflow, 0, 0, {"deviceId": someValue[0]._id}, []);
                                 }
                             });
                         }
@@ -220,12 +160,6 @@ exports.init = function (req, res) {
             },
             error: function (err) {
                 console.log(err);
-                workflow.outcome = {};
-                workflow.outcome.response = {
-                    "status": 2,
-                    "eventCode": 5,
-                    "message": err
-                };
                 workflow.emit('createDevice');
             }
         });
@@ -251,27 +185,21 @@ exports.init = function (req, res) {
         req.app.db.models.Device.create(fieldsToSet, function (err, devices) {
 
             if (err) {
-                workflow.outcome = {};
-                workflow.outcome.response = {
-                    "status": 2,
-                    "eventCode": 5,
-                    "message": err
-                };
-
-                return workflow.emit('api_response');
+                return sendResponse(workflow, 1, 0, {}, [{"code": 2, "message": "database error : " + err}]);
             }
-            workflow.outcome = {};
-            workflow.outcome.response = {
-                "status": 1,
-                "eventCode": 1,
-                "deviceId": id,
-                "message": "registration success"
-            };
-
-
-            return workflow.emit('api_response');
+            return sendResponse(workflow, 0, 0, {"deviceId": id}, []);
         });
     });
 
     workflow.emit('validate');
+}
+
+function sendResponse(workflow, status, eventCode, data, errors) {
+    workflow.outcome = {
+        "status": status,
+        "eventCode": eventCode,
+        "data": data,
+        "error": errors
+    };
+    return workflow.emit('api_response');
 }
