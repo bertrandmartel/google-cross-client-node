@@ -40,6 +40,10 @@
             border: thin solid #888;
             box-shadow: 1px 1px 1px grey;
             white-space: nowrap;
+        }
+
+        .center {
+            text-align: center;
             position: absolute;
             top: 50%;
             left: 50%;
@@ -69,17 +73,24 @@
         }
     </style>
 </head>
-<body>
+<body onload="init();">
 <div id="gSignInWrapper">
-    <div id="customBtn" class="customGPlusSignIn">
-        <span class="icon"></span>
-        <span class="buttonText">Se connecter avec Google</span>
+    <div class="center">
+        <h1 id="pageTitle"></h1>
+        <div id="customBtn" class="customGPlusSignIn">
+            <span class="icon"></span>
+            <span class="buttonText">Se connecter avec Google</span>
+        </div>
     </div>
 </div>
 
 <div id="log"></div>
 
 <script>
+
+    function init() {
+        document.getElementById("pageTitle").innerHTML = title;
+    }
 
     function startTimer(duration, display) {
         var timer = duration, minutes, seconds;

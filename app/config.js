@@ -11,6 +11,8 @@ exports.host = process.env.AUTH_SERVER_HOST || 'your-host';
 
 exports.useSSL = false;
 
+exports.oauthPageTitle = process.env.OAUTH_PAGE_TITLE || "Associate your device";
+
 exports.httpsConfig = {
     key: process.env.KEY_PATH || './server.key',
     pem: process.env.CERT_PATH || './server.crt'
