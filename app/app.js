@@ -90,7 +90,7 @@ var logger = new winston.Logger({
 });
 
 logger.stream = {
-    write: function(message, encoding) {
+    write: function (message, encoding) {
         logger.info(message);
     }
 };
@@ -124,9 +124,10 @@ if (("httpsConfig" in config) && ("key" in config.httpsConfig) && ("pem" in conf
 }
 
 //setup mongoose
+mongoose.Promise = global.Promise;
 app.db = mongoose.createConnection(config.mongodb.uri);
 app.db.on('error', console.error.bind(console, 'mongoose connection error: '));
-app.db.once('open', function() {
+app.db.once('open', function () {
     //and... we have a data store
 });
 
@@ -165,7 +166,7 @@ app.use(csrf({
 helmet(app);
 
 //response locals
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
     res.cookie('_csrfToken', req.csrfToken());
     res.locals.user = {};
     res.locals.user.defaultReturnUrl = req.user && req.user.defaultReturnUrl();
@@ -195,7 +196,7 @@ app.utility.slugify = require('./util/slugify');
 app.utility.workflow = require('./util/workflow');
 
 // launch listening loop
-server.listen(app.get('port'), function() {
+server.listen(app.get('port'), function () {
 
     console.log("Server listening at " + protocol + "://%s:%s", server.address().address, server.address().port)
 
