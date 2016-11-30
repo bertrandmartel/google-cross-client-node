@@ -2,11 +2,6 @@
 
 var fs = require('fs');
 
-if (!fileExists("./config.js")) {
-    console.log("error config.js is missing");
-    return;
-}
-
 //dependencies
 var config = require('./config'),
     express = require('express'),
@@ -26,6 +21,7 @@ var config = require('./config'),
     google = require('googleapis'),
     crypto = require('crypto'),
     jwt = require('jsonwebtoken'),
+    split = require('split'),
     csrf = require('csurf');
 
 var morgan = require('morgan')
@@ -89,11 +85,9 @@ var logger = new winston.Logger({
     exitOnError: false
 });
 
-logger.stream = {
-    write: function (message, encoding) {
-        logger.info(message);
-    }
-};
+logger.stream = split().on('data', function (message) {
+    logger.info(message);
+});
 
 app.logger = logger;
 
@@ -113,7 +107,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Avoids DEPTH_ZERO_SELF_SIGNED
 var server;
 var protocol = 'http';
 
-if (("httpsConfig" in config) && ("key" in config.httpsConfig) && ("pem" in config.httpsConfig) && fileExists(config.httpsConfig.key) && fileExists(config.httpsConfig.pem)) {
+if (config.useSSL && ("httpsConfig" in config) && ("key" in config.httpsConfig) && ("pem" in config.httpsConfig)) {
     server = https.createServer({
         key: fs.readFileSync(config.httpsConfig.key),
         cert: fs.readFileSync(config.httpsConfig.pem)
@@ -223,19 +217,4 @@ function createApiRouter(config, morgan, accessLogStream, logger) {
     require('./apiRoutes')(router, app);
 
     return router
-}
-
-function fileExists(path) {
-
-    try {
-        return fs.statSync(path).isFile();
-    } catch (e) {
-
-        if (e.code == 'ENOENT') { // no such file or directory. File really does not exist
-            return false;
-        }
-
-        console.log("Exception fs.statSync (" + path + "): " + e);
-        throw e; // something else went wrong, we don't have rights, ...
-    }
 }
