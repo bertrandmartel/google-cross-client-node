@@ -27,17 +27,13 @@ module.exports = function(req, res, next) {
                     try {
                         if (response.statusCode == 200) {
 
-                            console.log("test => " + items[1].trim());
-
                             var query = req.app.db.models.Device.find({}).select('access_token -_id');
 
                             query.where('access_token', items[1].trim()).exec(function(err, someValue) {
                                 if (err) {
                                     sendError(res, "check database failure");
                                 } else {
-                                    console.log(someValue);
                                     if (someValue.length > 0) {
-                                        console.log("success");
                                         next();
                                     } else {
                                         sendError(res, "not authorized");

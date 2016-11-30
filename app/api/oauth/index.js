@@ -2,14 +2,11 @@
 
 function revokeToken(token, app) {
 
-    app.reqmod("https://accounts.google.com/o/oauth2/revoke?token=" + token, function(error, response, body) {
-
-        console.log("revoking access token");
-
+    app.reqmod("https://accounts.google.com/o/oauth2/revoke?token=" + token, function (error, response, body) {
         if (error) {
-            console.log(error);
+            app.logger('error', error);
         } else {
-            console.log(body);
+            app.logger('verbose', "revoke token response : " + body);
         }
     });
 }
@@ -28,7 +25,6 @@ function sendTokenSuccess(tokens, res) {
     if ("refresh_token" in tokens) {
         ret.refresh_token = tokens.refresh_token;
     }
-    console.log(ret);
     res.setHeader('Content-Type', 'application/json; charset=utf-8')
     res.status(200).send(ret);
 }
@@ -66,7 +62,7 @@ function checkParams(req, check_redirect) {
     return true;
 }
 
-exports.userinfo = function(req, res) {
+exports.userinfo = function (req, res) {
 
     var authorization = req.headers['authorization'];
 
@@ -80,7 +76,7 @@ exports.userinfo = function(req, res) {
                 "access_token": items[1].trim()
             });
 
-            req.app.google.oauth2("v2").userinfo.v2.me.get({ auth: req.app.oauth2Client }, function(e, profile) {
+            req.app.google.oauth2("v2").userinfo.v2.me.get({auth: req.app.oauth2Client}, function (e, profile) {
 
                 if ("email" in profile && "name" in profile) {
 
@@ -108,11 +104,7 @@ exports.userinfo = function(req, res) {
     }
 }
 
-exports.tokensignin = function(req, res) {
-
-    console.log("in tokensignin");
-    console.log(req.body);
-    console.log(JSON.stringify(req.headers));
+exports.tokensignin = function (req, res) {
 
     if (("grant_type" in req.body) && ("client_id" in req.body) && ("client_secret" in req.body)) {
 
@@ -132,7 +124,7 @@ exports.tokensignin = function(req, res) {
                 return;
             }
 
-            req.app.oauth2Client.getToken(req.body.code, function(err, tokens) {
+            req.app.oauth2Client.getToken(req.body.code, function (err, tokens) {
                 // Now tokens contains an access_token and an optional refresh_token. Save them.
                 if (!err) {
                     if ("access_token" in tokens) {
@@ -143,24 +135,21 @@ exports.tokensignin = function(req, res) {
                             refresh_token = tokens.refresh_token;
                         }
 
-                        console.log(tokens);
                         req.app.oauth2Client.setCredentials(tokens);
 
-                        req.app.google.oauth2("v2").userinfo.v2.me.get({ auth: req.app.oauth2Client }, function(e, profile) {
+                        req.app.google.oauth2("v2").userinfo.v2.me.get({auth: req.app.oauth2Client}, function (e, profile) {
 
                             if ("email" in profile) {
 
-                                console.log(profile.email);
-
                                 var query = req.app.db.models.Device.find({}).select('email _id');
 
-                                query.where('email', profile.email).exec(function(err, someValue) {
+                                query.where('email', profile.email).exec(function (err, someValue) {
                                     if (err) {
-                                        console.log(err);
+                                        req.app.logger('error', err);
                                         sendError(tokens, res, "select device failure", req.app);
                                     } else {
                                         if (someValue.length > 0) {
-                                            console.log("updating device with id  : " + someValue[0]._id);
+                                            req.app.logger('verbose', "updating device with id  : " + someValue[0]._id);
 
                                             var fieldsToSet = {};
                                             fieldsToSet.access_token = tokens.access_token;
@@ -172,22 +161,19 @@ exports.tokensignin = function(req, res) {
                                                 fieldsToSet.refresh_token = tokens.refresh_token;
                                             }
 
-                                            req.app.db.models.Device.findByIdAndUpdate(someValue[0]._id, fieldsToSet, { new: true }, function(err, devices) {
+                                            req.app.db.models.Device.findByIdAndUpdate(someValue[0]._id, fieldsToSet, {new: true}, function (err, devices) {
                                                 if (err) {
-                                                    console.log(err);
+                                                    req.app.logger('error', err);
                                                     sendError(tokens, res, "update failure", req.app);
                                                 } else {
-                                                    console.log("update success");
                                                     sendTokenSuccess(tokens, res);
                                                 }
                                             });
                                         } else {
-
-                                            console.log("inserting device");
+                                            req.app.logger('verbose', "inserting device");
                                             var current_date = (new Date()).valueOf().toString();
                                             var random = Math.random().toString();
                                             var id = req.app.crypto.createHash('sha1').update(current_date + random).digest('hex');
-                                            console.log("new id : " + id);
 
                                             req.app.db.models.Device.create({
                                                 _id: id,
@@ -198,13 +184,12 @@ exports.tokensignin = function(req, res) {
                                                 refresh_token: refresh_token,
                                                 last_refresh_date: Date.now(),
                                                 webservice_login_date: Date.now()
-                                            }, function(err, devices) {
+                                            }, function (err, devices) {
 
                                                 if (err) {
-                                                    console.log(err);
+                                                    req.app.logger('error', err);
                                                     sendError(tokens, res, "insertion failure", req.app);
                                                 } else {
-                                                    console.log("insertion success");
                                                     sendTokenSuccess(tokens, res);
                                                 }
                                             });
@@ -220,7 +205,7 @@ exports.tokensignin = function(req, res) {
                         sendError(tokens, res, "access token not retrieved", req.app);
                     }
                 } else {
-                    console.log(err);
+                    req.app.logger('error', err);
                     sendError(tokens, res, err.message, req.app);
                 }
             });
@@ -240,7 +225,7 @@ exports.tokensignin = function(req, res) {
                 "refresh_token": req.body.refresh_token
             });
 
-            req.app.oauth2Client.refreshAccessToken(function(err, tokens) {
+            req.app.oauth2Client.refreshAccessToken(function (err, tokens) {
 
                 if (!err) {
                     if ("access_token" in tokens) {
@@ -251,11 +236,7 @@ exports.tokensignin = function(req, res) {
                             refresh_token = tokens.refresh_token;
                         }
 
-                        var ret = {
-                            "access_token": tokens.access_token,
-                            "refresh_token": refresh_token
-                        };
-                        console.log("refresh success");
+                        req.app.logger('verbose', "refresh success");
 
                         var fieldsToSet = {};
                         fieldsToSet.access_token = tokens.access_token;
@@ -266,21 +247,19 @@ exports.tokensignin = function(req, res) {
                         }
                         req.app.oauth2Client.setCredentials(tokens);
 
-                        req.app.google.oauth2("v2").userinfo.v2.me.get({ auth: req.app.oauth2Client }, function(e, profile) {
+                        req.app.google.oauth2("v2").userinfo.v2.me.get({auth: req.app.oauth2Client}, function (e, profile) {
 
                             if ("email" in profile) {
 
-                                console.log(profile.email);
-
                                 var query = req.app.db.models.Device.find({}).select('email _id');
 
-                                query.where('email', profile.email).exec(function(err, someValue) {
+                                query.where('email', profile.email).exec(function (err, someValue) {
                                     if (err) {
-                                        console.log(err);
+                                        req.app.logger('error', err);
                                         sendError(tokens, res, "select device failure", req.app);
                                     } else {
                                         if (someValue.length > 0) {
-                                            console.log("updating device with id  : " + someValue[0]._id);
+                                            req.app.logger('verbose', "updating device with id  : " + someValue[0]._id);
 
                                             var fieldsToSet = {};
                                             fieldsToSet.access_token = tokens.access_token;
@@ -290,12 +269,11 @@ exports.tokensignin = function(req, res) {
                                                 fieldsToSet.refresh_token = tokens.refresh_token;
                                             }
 
-                                            req.app.db.models.Device.findByIdAndUpdate(someValue[0]._id, fieldsToSet, { new: true }, function(err, devices) {
+                                            req.app.db.models.Device.findByIdAndUpdate(someValue[0]._id, fieldsToSet, {new: true}, function (err, devices) {
                                                 if (err) {
-                                                    console.log(err);
+                                                    req.app.logger('error', err);
                                                     sendError(tokens, res, "update failure", req.app);
                                                 } else {
-                                                    console.log("update success");
                                                     sendRefreshSuccess(fieldsToSet.access_token, fieldsToSet.refresh_token, res);
                                                 }
                                             });
@@ -312,7 +290,7 @@ exports.tokensignin = function(req, res) {
                         sendError(null, res, "access token not retrieved", req.app);
                     }
                 } else {
-                    console.log(err);
+                    req.app.logger('error', err);
                     sendError(null, res, "failure during token refresh", req.app);
                 }
             });

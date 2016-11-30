@@ -79,7 +79,7 @@ exports.init = function (req, res) {
         req.app.reqmod('https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' + req.body.token, function (error, response, body) {
 
             if (error) {
-                console.log(error);
+                req.app.logger('error', error);
                 return sendResponse(workflow, 1, 0, {}, [{"code": 3, "message": "verification failure : " + error}]);
             }
             try {
@@ -103,7 +103,7 @@ exports.init = function (req, res) {
 
             req.app.db.models.Device.findOneAndRemove({email: req.email}, function (err) {
                 if (err) {
-                    console.log(err);
+                    req.app.logger('error', err);
                 }
                 return workflow.emit('sendEmail');
             });
@@ -135,7 +135,6 @@ exports.init = function (req, res) {
                                         "message": "database error : " + err
                                     }]);
                                 } else {
-                                    console.log("update success");
                                     sendResponse(workflow, 0, 0, {"deviceId": someValue[0]._id}, []);
                                 }
                             });
@@ -159,7 +158,7 @@ exports.init = function (req, res) {
                 workflow.emit('createDevice');
             },
             error: function (err) {
-                console.log(err);
+                req.app.logger('error', err);
                 workflow.emit('createDevice');
             }
         });
@@ -172,7 +171,6 @@ exports.init = function (req, res) {
         var current_date = (new Date()).valueOf().toString();
         var random = Math.random().toString();
         var id = req.app.crypto.createHash('sha1').update(current_date + random).digest('hex');
-        console.log("new id : " + id);
 
         var fieldsToSet = {
             _id: id,

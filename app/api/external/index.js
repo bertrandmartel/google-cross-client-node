@@ -20,9 +20,7 @@ exports.authenticated = function (req, res) {
             if (err) {
                 sendError(500, "check database failure", res);
             } else {
-                console.log(value);
                 if (value.length > 0) {
-                    console.log("success");
                     res.status(200).send({
                         "is_device_login": value[0].is_device_login,
                         "is_webservice_login": value[0].is_webservice_login
@@ -42,14 +40,12 @@ exports.client_check = function (req, res) {
 
     var authorization = req.headers['authorization'].split(/[ ]+/);
 
-    console.log("in client_check : " + authorization[2].trim());
-
     if (authorization[2].trim() != "") {
 
         req.app.reqmod('https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=' + authorization[2].trim(), function (error, response, body) {
 
             if (error) {
-                console.log("request error");
+                req.app.logger('error', error);
                 sendError(500, "verification request error", res);
             } else {
                 try {
@@ -62,15 +58,12 @@ exports.client_check = function (req, res) {
                             if (err) {
                                 sendError(500, "check database failure", res);
                             } else {
-                                console.log("in result");
-                                console.log(value);
                                 if (value.length > 0) {
-                                    console.log("success");
                                     res.status(200).send({
                                         "deviceId": value[0]._id
                                     });
                                 } else {
-                                    console.log("verification failed");
+                                    req.app.logger('error', "verification failed");
                                     sendError(500, "access token not found", res);
                                 }
                             }
@@ -102,9 +95,7 @@ exports.accesstoken = function (req, res) {
             if (err) {
                 sendError(500, "check database failure", res);
             } else {
-                console.log(value);
                 if (value.length > 0) {
-                    console.log("success");
                     res.status(200).send({
                         "deviceId": value[0]._id
                     });
@@ -128,7 +119,6 @@ exports.id_token = function (req, res) {
             if (error) {
                 sendError(500, "verification request error", res);
             } else {
-                console.log(req.body.id_token);
                 try {
                     if (response.statusCode == 200) {
 
@@ -139,9 +129,7 @@ exports.id_token = function (req, res) {
                             if (err) {
                                 sendError(500, "check database failure", res);
                             } else {
-                                console.log(value + " & " + body.email);
                                 if (value.length > 0 && body.email == value[0].email) {
-                                    console.log("success");
                                     res.status(200).send({});
                                 } else {
                                     sendError(500, "access token not found", res);

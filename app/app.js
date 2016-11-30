@@ -95,14 +95,14 @@ logger.stream = {
     }
 };
 
+app.logger = logger;
+
 app.use(require("morgan")("combined", {
     "stream": logger.stream
 }));
 
 // create api router
-app.api = createApiRouter(app.config, morgan, accessLogStream);
-
-console.log("api : " + app.config.baseUrl + '/api/v' + app.config.api.version);
+app.api = createApiRouter(app.config, morgan, accessLogStream, logger);
 
 // mount api before csrf is appended to the app stack
 app.use(app.config.baseUrl + '/api/v' + app.config.api.version, app.api);
@@ -197,12 +197,11 @@ app.utility.workflow = require('./util/workflow');
 
 // launch listening loop
 server.listen(app.get('port'), function () {
-
-    console.log("Server listening at " + protocol + "://%s:%s", server.address().address, server.address().port)
+    app.logger.log('info', "Server listening at " + protocol + "://%s:%s", server.address().address, server.address().port);
 
 })
 
-function createApiRouter(config, morgan, accessLogStream) {
+function createApiRouter(config, morgan, accessLogStream, logger) {
 
     var router = new express.Router();
     router.use(bodyParser.urlencoded({
@@ -215,7 +214,7 @@ function createApiRouter(config, morgan, accessLogStream) {
     if ("jwt" in app.config && "secret" in app.config.jwt && "private_key" in app.config.jwt) {
         router.all('/oauth/ext/*', [require('./middlewares/jwtcors')]);
     } else {
-        console.log("jwt not specified in configuration");
+        logger.log('error', 'jwt not specified in configuration')
     }
     // setup the logger
     //router.use(morgan(config.logFormat, {stream: accessLogStream}))
@@ -233,7 +232,6 @@ function fileExists(path) {
     } catch (e) {
 
         if (e.code == 'ENOENT') { // no such file or directory. File really does not exist
-            console.log("File does not exist.");
             return false;
         }
 

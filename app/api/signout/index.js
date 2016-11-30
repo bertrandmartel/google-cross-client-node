@@ -21,12 +21,10 @@ exports.init = function (req, res) {
     //verify token
     workflow.on('verifier_signout', function () {
 
-        console.log("find token : " + req.body.token);
-
         req.app.reqmod('https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' + req.body.token, function (error, response, body) {
 
             if (error) {
-                console.log(error);
+                req.app.logger('error', error);
                 return sendResponse(workflow, 1, 0, {}, [{"code": 3, "message": "verification failure : " + error}]);
             }
             try {
