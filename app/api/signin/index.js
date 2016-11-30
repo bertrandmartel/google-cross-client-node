@@ -79,7 +79,7 @@ exports.init = function (req, res) {
         req.app.reqmod('https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' + req.body.token, function (error, response, body) {
 
             if (error) {
-                req.app.logger('error', error);
+                req.app.logger.log('error', 'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' + req.body.token + " : " + error.message);
                 return sendResponse(workflow, 1, 0, {}, [{"code": 3, "message": "verification failure : " + error}]);
             }
             try {
@@ -103,7 +103,7 @@ exports.init = function (req, res) {
 
             req.app.db.models.Device.findOneAndRemove({email: req.email}, function (err) {
                 if (err) {
-                    req.app.logger('error', err);
+                    req.app.logger.log('error', "duplicatedevicesCheck : " + err.message);
                 }
                 return workflow.emit('sendEmail');
             });
@@ -115,6 +115,7 @@ exports.init = function (req, res) {
 
             query.where('email', req.email).exec(function (err, someValue) {
                 if (err) {
+                    req.app.logger.log('error', "query email : " + err.message);
                     sendResponse(workflow, 1, 0, {}, [{"code": 2, "message": "database error : " + err}]);
                 } else {
                     if (someValue.length > 0) {
@@ -130,6 +131,7 @@ exports.init = function (req, res) {
 
                             req.app.db.models.Device.findByIdAndUpdate(someValue[0]._id, fieldsToSet, {new: true}, function (err, devices) {
                                 if (err) {
+                                    req.app.logger.log('error', "database error : " + err.message);
                                     sendResponse(workflow, 1, 0, {}, [{
                                         "code": 2,
                                         "message": "database error : " + err
@@ -158,7 +160,7 @@ exports.init = function (req, res) {
                 workflow.emit('createDevice');
             },
             error: function (err) {
-                req.app.logger('error', err);
+                req.app.logger.log('error', "send mail error : " + err.message);
                 workflow.emit('createDevice');
             }
         });
@@ -183,6 +185,7 @@ exports.init = function (req, res) {
         req.app.db.models.Device.create(fieldsToSet, function (err, devices) {
 
             if (err) {
+                req.app.logger.log('error', "create device error : " + err.message);
                 return sendResponse(workflow, 1, 0, {}, [{"code": 2, "message": "database error : " + err}]);
             }
             return sendResponse(workflow, 0, 0, {"deviceId": id}, []);

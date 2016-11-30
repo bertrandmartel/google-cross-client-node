@@ -24,7 +24,7 @@ exports.init = function (req, res) {
         req.app.reqmod('https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' + req.body.token, function (error, response, body) {
 
             if (error) {
-                req.app.logger('error', error);
+                req.app.logger.log('error', 'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' + req.body.token + " : " + error.message);
                 return sendResponse(workflow, 1, 0, {}, [{"code": 3, "message": "verification failure : " + error}]);
             }
             try {
@@ -33,9 +33,11 @@ exports.init = function (req, res) {
                     req.email = bodyJson.email;
                     workflow.emit('signout');
                 } else {
+                    req.app.logger.log('error', "verification failure (format)");
                     return sendResponse(workflow, 1, 0, {}, [{"code": 3, "message": "verification failure (format)"}]);
                 }
             } catch (e) {
+                req.app.logger.log('error', "request format error");
                 return sendResponse(workflow, 1, 0, {}, [{"code": 7, "message": "request format error : " + e}]);
             }
         });
@@ -47,6 +49,7 @@ exports.init = function (req, res) {
 
         req.app.db.models.Device.findOneAndRemove({email: req.email}, function (err) {
             if (err) {
+                req.app.logger.log('error', "database error : " + err.message);
                 return sendResponse(workflow, 1, 1, {}, [{"code": 2, "message": "database error : " + err}]);
             }
             return sendResponse(workflow, 0, 1, {}, []);

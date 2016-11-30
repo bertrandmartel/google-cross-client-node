@@ -25,6 +25,7 @@ module.exports = function (req, res, next) {
 
             req.app.jwt.verify(items[1].trim(), cert, {algorithms: ['HS512']}, function (err, decoded) {
                 if (err) {
+                    req.app.logger.log('error', err.message);
                     sendError(res, err.message);
                 }
                 else {
@@ -32,16 +33,19 @@ module.exports = function (req, res, next) {
                         next();
                     }
                     else {
+                        req.app.logger.log('error', 'unauthorized');
                         sendError(res, "unauthorized");
                     }
                 }
             });
         }
         else {
+            req.app.logger.log('error', 'bad authorization protocol');
             sendError(res, "bad authorization protocol");
         }
     }
     else {
+        req.app.logger.log('error', 'not authorized');
         sendError(res, "not authorized");
     }
 
