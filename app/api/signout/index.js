@@ -67,5 +67,10 @@ function sendResponse(workflow, status, eventCode, data, errors) {
         "data": data,
         "error": errors
     };
-    return workflow.emit('api_response');
+    if (status == 0) {
+        return workflow.emit('api_response_success');
+    }
+    else {
+        return workflow.emit('api_response_error');
+    }
 }
