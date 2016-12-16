@@ -8,11 +8,11 @@ exports.init = function (req, res) {
     workflow.on('validate', function () {
 
         if (!req.body.token) {
-            return sendResponse(workflow, 1, 0, {}, [{"code": 0, "message": "token is required"}]);
+            return sendResponse(req, workflow, 1, 0, {}, [{"code": 0, "message": "token is required"}]);
         }
 
         if (!req.body.error) {
-            return sendResponse(workflow, 1, 0, {}, [{"code": 0, "message": "error report is required"}]);
+            return sendResponse(req, workflow, 1, 0, {}, [{"code": 0, "message": "error report is required"}]);
         }
 
         workflow.emit('verifier');
@@ -25,7 +25,10 @@ exports.init = function (req, res) {
 
             if (error) {
                 req.app.logger.log('error', 'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' + req.body.token + " : " + error.message);
-                return sendResponse(workflow, 1, 0, {}, [{"code": 3, "message": "verification failure : " + error}]);
+                return sendResponse(req, workflow, 1, 0, {}, [{
+                    "code": 3,
+                    "message": "verification failure : " + error
+                }]);
             }
             try {
                 var bodyJson = JSON.parse(body);
@@ -33,10 +36,13 @@ exports.init = function (req, res) {
                     req.email = bodyJson.email;
                     workflow.emit('checkDate');
                 } else {
-                    return sendResponse(workflow, 1, 0, {}, [{"code": 3, "message": "verification failure (format)"}]);
+                    return sendResponse(req, workflow, 1, 0, {}, [{
+                        "code": 3,
+                        "message": "verification failure (format)"
+                    }]);
                 }
             } catch (e) {
-                return sendResponse(workflow, 1, 0, {}, [{"code": 7, "message": "request format error : " + e}]);
+                return sendResponse(req, workflow, 1, 0, {}, [{"code": 7, "message": "request format error : " + e}]);
             }
         });
     });
@@ -53,11 +59,11 @@ exports.init = function (req, res) {
         }).limit(10).exec(function (err, report) {
             if (err) {
                 req.app.logger.log('error', "create report error : " + err.message);
-                return sendResponse(workflow, 1, 0, {}, [{"code": 2, "message": "database error : " + err}]);
+                return sendResponse(req, workflow, 1, 0, {}, [{"code": 2, "message": "database error : " + err}]);
             }
             if (report.length >= 10) {
                 req.app.logger.log('error', "max report error for user");
-                return sendResponse(workflow, 1, 0, {}, [{"code": 3, "message": "verification failure (format)"}]);
+                return sendResponse(req, workflow, 1, 0, {}, [{"code": 3, "message": "verification failure (format)"}]);
             }
             workflow.emit('storeReport');
         });
@@ -78,9 +84,9 @@ exports.init = function (req, res) {
 
             if (err) {
                 req.app.logger.log('error', "create report error : " + err.message);
-                return sendResponse(workflow, 1, 0, {}, [{"code": 2, "message": "database error : " + err}]);
+                return sendResponse(req, workflow, 1, 0, {}, [{"code": 2, "message": "database error : " + err}]);
             }
-            return sendResponse(workflow, 0, 0, {}, []);
+            return sendResponse(req, workflow, 0, 0, {}, []);
         });
 
     });
@@ -88,7 +94,7 @@ exports.init = function (req, res) {
     workflow.emit('validate');
 }
 
-function sendResponse(workflow, status, eventCode, data, errors) {
+function sendResponse(req, workflow, status, eventCode, data, errors) {
     workflow.outcome = {
         "status": status,
         "eventCode": eventCode,
@@ -97,6 +103,12 @@ function sendResponse(workflow, status, eventCode, data, errors) {
     };
 
     if (status == 0) {
+        req.app.utility.analytics(req.app,
+            'ERROR_REPORT',
+            '',
+            '1',
+            req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+            req.headers['user-agent']);
         return workflow.emit('api_response_success');
     }
     else {

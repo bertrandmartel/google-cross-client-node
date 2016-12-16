@@ -11,14 +11,30 @@ function revokeToken(token, app) {
     });
 }
 
-function sendRefreshSuccess(access_token, refresh_token, res) {
+function sendRefreshSuccess(req, access_token, refresh_token, res) {
+
+    req.app.utility.analytics(req.app,
+        'REFRESH_SUCCESS',
+        '',
+        '1',
+        req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+        req.headers['user-agent']);
+
     var ret = {};
     ret.access_token = access_token;
     ret.refresh_token = refresh_token;
     res.status(200).send(ret);
 }
 
-function sendTokenSuccess(tokens, res) {
+function sendTokenSuccess(req, tokens, res) {
+
+    req.app.utility.analytics(req.app,
+        'AUTHORIZATION_CODE_SUCCESS',
+        '',
+        '1',
+        req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+        req.headers['user-agent']);
+
     var ret = {};
     ret.token_type = "Bearer";
     ret.access_token = tokens.access_token;
@@ -169,7 +185,7 @@ exports.tokensignin = function (req, res) {
                                                     req.app.logger.log('error', "update failure : " + err.message);
                                                     sendError(tokens, res, "update failure", req.app);
                                                 } else {
-                                                    sendTokenSuccess(tokens, res);
+                                                    sendTokenSuccess(req, tokens, res);
                                                 }
                                             });
                                         } else {
@@ -193,7 +209,7 @@ exports.tokensignin = function (req, res) {
                                                     req.app.logger.log('error', "insertion failure : " + err.message);
                                                     sendError(tokens, res, "insertion failure", req.app);
                                                 } else {
-                                                    sendTokenSuccess(tokens, res);
+                                                    sendTokenSuccess(req, tokens, res);
                                                 }
                                             });
 
@@ -277,7 +293,7 @@ exports.tokensignin = function (req, res) {
                                                     req.app.logger.log('error', "update failure : " + err.message);
                                                     sendError(tokens, res, "update failure", req.app);
                                                 } else {
-                                                    sendRefreshSuccess(fieldsToSet.access_token, fieldsToSet.refresh_token, res);
+                                                    sendRefreshSuccess(req, fieldsToSet.access_token, fieldsToSet.refresh_token, res);
                                                 }
                                             });
                                         } else {

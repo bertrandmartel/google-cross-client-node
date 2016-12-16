@@ -8,11 +8,11 @@ exports.init = function (req, res) {
     workflow.on('validate', function () {
 
         if (!req.body.token) {
-            return sendResponse(workflow, 1, 0, {}, [{"code": 0, "message": "token is required"}]);
+            return sendResponse(req, workflow, 1, 0, {}, [{"code": 0, "message": "token is required"}]);
         }
 
         if (!req.body.hash) {
-            return sendResponse(workflow, 1, 0, {}, [{"code": 0, "message": "hash is required"}]);
+            return sendResponse(req, workflow, 1, 0, {}, [{"code": 0, "message": "hash is required"}]);
         }
 
         workflow.emit('checkwhitelist');
@@ -68,7 +68,7 @@ exports.init = function (req, res) {
             if (match) {
                 workflow.emit('verifier');
             } else {
-                return sendResponse(workflow, 1, 0, {}, [{"code": 5, "message": "device not authorized"}]);
+                return sendResponse(req, workflow, 1, 0, {}, [{"code": 5, "message": "device not authorized"}]);
             }
         });
     });
@@ -80,7 +80,10 @@ exports.init = function (req, res) {
 
             if (error) {
                 req.app.logger.log('error', 'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' + req.body.token + " : " + error.message);
-                return sendResponse(workflow, 1, 0, {}, [{"code": 3, "message": "verification failure : " + error}]);
+                return sendResponse(req, workflow, 1, 0, {}, [{
+                    "code": 3,
+                    "message": "verification failure : " + error
+                }]);
             }
             try {
                 var bodyJson = JSON.parse(body);
@@ -88,10 +91,13 @@ exports.init = function (req, res) {
                     req.email = bodyJson.email;
                     workflow.emit('duplicatedevicesCheck');
                 } else {
-                    return sendResponse(workflow, 1, 0, {}, [{"code": 3, "message": "verification failure (format)"}]);
+                    return sendResponse(req, workflow, 1, 0, {}, [{
+                        "code": 3,
+                        "message": "verification failure (format)"
+                    }]);
                 }
             } catch (e) {
-                return sendResponse(workflow, 1, 0, {}, [{"code": 7, "message": "request format error : " + e}]);
+                return sendResponse(req, workflow, 1, 0, {}, [{"code": 7, "message": "request format error : " + e}]);
             }
         });
     });
@@ -116,12 +122,12 @@ exports.init = function (req, res) {
             query.where('email', req.email).exec(function (err, someValue) {
                 if (err) {
                     req.app.logger.log('error', "query email : " + err.message);
-                    sendResponse(workflow, 1, 0, {}, [{"code": 2, "message": "database error : " + err}]);
+                    sendResponse(req, workflow, 1, 0, {}, [{"code": 2, "message": "database error : " + err}]);
                 } else {
                     if (someValue.length > 0) {
 
                         if (!(someValue[0].hash == req.body.hash) && !(someValue[0].hash == "")) {
-                            sendResponse(workflow, 1, 0, {}, [{"code": 6, "message": "duplicate device"}]);
+                            sendResponse(req, workflow, 1, 0, {}, [{"code": 6, "message": "duplicate device"}]);
                         } else {
 
                             var fieldsToSet = {};
@@ -132,12 +138,12 @@ exports.init = function (req, res) {
                             req.app.db.models.Device.findByIdAndUpdate(someValue[0]._id, fieldsToSet, {new: true}, function (err, devices) {
                                 if (err) {
                                     req.app.logger.log('error', "database error : " + err.message);
-                                    sendResponse(workflow, 1, 0, {}, [{
+                                    sendResponse(req, workflow, 1, 0, {}, [{
                                         "code": 2,
                                         "message": "database error : " + err
                                     }]);
                                 } else {
-                                    sendResponse(workflow, 0, 0, {"deviceId": someValue[0]._id}, []);
+                                    sendResponse(req, workflow, 0, 0, {"deviceId": someValue[0]._id}, []);
                                 }
                             });
                         }
@@ -186,16 +192,16 @@ exports.init = function (req, res) {
 
             if (err) {
                 req.app.logger.log('error', "create device error : " + err.message);
-                return sendResponse(workflow, 1, 0, {}, [{"code": 2, "message": "database error : " + err}]);
+                return sendResponse(req, workflow, 1, 0, {}, [{"code": 2, "message": "database error : " + err}]);
             }
-            return sendResponse(workflow, 0, 0, {"deviceId": id}, []);
+            return sendResponse(req, workflow, 0, 0, {"deviceId": id}, []);
         });
     });
 
     workflow.emit('validate');
 }
 
-function sendResponse(workflow, status, eventCode, data, errors) {
+function sendResponse(req, workflow, status, eventCode, data, errors) {
     workflow.outcome = {
         "status": status,
         "eventCode": eventCode,
@@ -203,9 +209,21 @@ function sendResponse(workflow, status, eventCode, data, errors) {
         "error": errors
     };
     if (status == 0) {
+        req.app.utility.analytics(req.app,
+            'SIGNIN_SUCCESS',
+            '',
+            '1',
+            req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+            req.headers['user-agent']);
         return workflow.emit('api_response_success');
     }
     else {
+        req.app.utility.analytics(req.app,
+            'SIGNIN_FAILURE',
+            '',
+            '1',
+            req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+            req.headers['user-agent']);
         return workflow.emit('api_response_error');
     }
 }

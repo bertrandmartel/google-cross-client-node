@@ -32,3 +32,4 @@ export AUTHENT_LOG_FILE_PATH=/usr/src/log/authentication-server.log
 export USER_PATH=/home/user
 export AUTH_SERVER_PREFIX=/service
 export AUTH_SERVER_HOST=your-host
+export GA_TRACKING_ID=XXXXXXX

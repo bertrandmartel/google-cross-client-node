@@ -5,6 +5,11 @@ exports.mongodb = {
     uri: process.env.MONGO_AUTH_URI || 'mongodb://localhost:27017/gcrossclient'
 };
 
+exports.analytics = {
+    tracking_id: process.env.GA_TRACKING_ID || 'XXXXXXXX',
+    category: 'auth-server'
+};
+
 exports.baseUrl = process.env.AUTH_SERVER_PREFIX || '/service';
 
 exports.host = process.env.AUTH_SERVER_HOST || 'your-host';

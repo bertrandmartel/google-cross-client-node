@@ -188,12 +188,13 @@ app.utility = {};
 app.utility.sendmail = require('./util/sendmail');
 app.utility.slugify = require('./util/slugify');
 app.utility.workflow = require('./util/workflow');
+app.utility.analytics = require('./util/analytics');
 
 // launch listening loop
 server.listen(app.get('port'), function () {
     app.logger.log('info', "Server listening at " + protocol + "://%s:%s", server.address().address, server.address().port);
-
-})
+    app.utility.analytics(app, 'START_SERVER', '', '1');
+});
 
 function createApiRouter(config, morgan, accessLogStream, logger) {
 
@@ -204,6 +205,8 @@ function createApiRouter(config, morgan, accessLogStream, logger) {
     router.use(bodyParser.json());
 
     router.app = app;
+
+    router.all('/*', [require('./middlewares/ga')]);
 
     if ("jwt" in app.config && "secret" in app.config.jwt && "private_key" in app.config.jwt) {
         router.all('/oauth/ext/*', [require('./middlewares/jwtcors')]);
