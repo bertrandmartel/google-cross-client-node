@@ -4,7 +4,7 @@ Node JS server authenticating Android clients with google signin compliant with 
 
 Android devices will send their device serial + google JWT token to this server which will check google authentication, check device serial from a whitelist and store email/serial in database
 
-To be used with this Android client : https://github.com/akinaru/google-cross-client-android
+To be used with this Android client : https://github.com/bertrandmartel/google-cross-client-android
 
 This project is built from <a href="https://github.com/jedireza/drywall">drywall</a>
 

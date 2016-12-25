@@ -1,5 +1,5 @@
 auth-server:
-  image: 'akinaru/google-cross-client'
+  image: 'bertrandmartel/google-cross-client'
   restart: always
   ports:
     - "${AUTH_SERVER_PORT}:${AUTH_SERVER_PORT}"

@@ -1,5 +1,5 @@
 /**
- * Created by akinaru on 14/12/16.
+ * Created by bertrandmartel on 14/12/16.
  */
 
 // https://developers.google.com/analytics/devguides/collection/protocol/v1/parameters
