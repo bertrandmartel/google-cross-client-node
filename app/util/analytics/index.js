@@ -32,8 +32,6 @@ exports = module.exports = function trackEvent(app, action, label, value, uip, u
         headers['User-agent'] = app.config.analytics.category;
     }
 
-    console.log(data);
-
     app.reqmod.post({
             url: 'http://www.google-analytics.com/collect',
             form: data,
