@@ -19,7 +19,7 @@ This project is built from <a href="https://github.com/jedireza/drywall">drywall
 
 * create file config.js :
 
-```
+```javascript
 'use strict';
 
 exports.port = process.env.PORT || 4747;
@@ -78,7 +78,7 @@ exports.authentication_thirdpart = {
 
 * create your admin in mongo database : 
 
-```
+```javascript
 use gcrossclient
 
 db.admingroups.insert({ _id: 'root', name: 'Root' });
@@ -92,7 +92,7 @@ db.admins.save(rootAdmin);
 
 * install & start
 
-```
+```bash
 cd app
 npm install
 npm start
@@ -159,7 +159,7 @@ Get auth status for both device & webservice
 
 request example :
 
-```
+```bash
 POST /api/v1/oauth/ext/authstatus HTTP/1.1
 Host: localhost:4747
 Content-Type: application/json
@@ -172,7 +172,7 @@ Authorization: Bearer <your_jwt_token_here>
 
 response body example :
 
-```
+```json
 {
   "deviceId":"akofsdro2323232323"
 }
@@ -184,7 +184,7 @@ Get device ID from Google access token
 
 request example :
 
-```
+```bash
 POST /api/oauth/ext/device HTTP/1.1
 Host: localhost:4747
 Content-Type: application/json
@@ -197,7 +197,7 @@ Authorization: Bearer <your_jwt_token_here>
 
 response body example :
 
-```
+```json
 {
   "is_device_login": true,
   "is_webservice_login": false
@@ -208,7 +208,7 @@ note : to encode/decode JWT, <a href="https://github.com/auth0/node-jsonwebtoken
 
 To encode JWT :
 
-```
+```javascript
 var cert2 = fs.readFileSync(config.jwt.private_key);
 var token = jwt.sign(config.jwt.secret, cert2, {algorithm: 'HS512'});
 console.log(token);
@@ -223,7 +223,7 @@ console.log(token);
 * place your SSL server key & your JWT keys in a `key` folder
 
 then :
-```
+```bash
 source vars-template.sh
 envsubst < docker-compose-template.yml > docker-compose.yml
 docker-compose up
@@ -231,7 +231,7 @@ docker-compose up
 
 ### Docker-cloud
 
-```
+```bash
 export USER_PATH=/home/bobby
 source vars-template.sh
 envsubst < stackfile-template.yml > stackfile.yml
@@ -239,7 +239,7 @@ envsubst < stackfile-template.yml > stackfile.yml
 
 * revise your `stackfile.yml` file before creating/updating the stack :
 
-```
+```bash
 # create the stack :
 
 docker-cloud stack create --name authentication-server -f stackfile.yml
@@ -251,7 +251,7 @@ docker-cloud stack update -f stackfile.yml <uuid>
 
 * start/deploy :
 
-```
+```bash
 # start the stack :
 
 docker-cloud stack start <uuid>
@@ -263,4 +263,4 @@ docker-cloud stack redeploy <uuid>
 
 ## License
 
-The MIT License (MIT) Copyright (c) 2016 Bertrand Martel
+The MIT License (MIT) Copyright (c) 2016-2018 Bertrand Martel
