@@ -16,12 +16,9 @@ var config = require('./config'),
     mongoose = require('mongoose'),
     path = require('path'),
     helmet = require('helmet'),
-    morgan = require('morgan'),
-    FileStreamRotator = require('file-stream-rotator'),
     google = require('googleapis'),
     crypto = require('crypto'),
     jwt = require('jsonwebtoken'),
-    split = require('split'),
     csrf = require('csurf');
 
 var morgan = require('morgan')
@@ -51,30 +48,12 @@ var logDirectory = __dirname + '/log'
 // ensure log directory exists
 fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory)
 
-// create a rotating write stream
-var accessLogStream = FileStreamRotator.getStream({
-    date_format: 'YYYYMMDD',
-    filename: logDirectory + '/access-%DATE%.log',
-    frequency: 'daily',
-    verbose: false
-})
-
 app.config = config;
 app.locals.baseUrl = app.config.baseUrl;
 
 // setup the logger
-//app.use(morgan(app.config.logFormat, {stream: accessLogStream}))
 var logger = new winston.Logger({
     transports: [
-        new winston.transports.File({
-            level: 'info',
-            filename: process.env.AUTHENT_LOG_FILE_PATH,
-            handleExceptions: true,
-            json: true,
-            maxsize: 50000000, //50MB
-            maxFiles: 1,
-            colorize: false
-        }),
         new winston.transports.Console({
             level: 'debug',
             handleExceptions: true,
@@ -85,18 +64,12 @@ var logger = new winston.Logger({
     exitOnError: false
 });
 
-logger.stream = split().on('data', function (message) {
-    logger.info(message);
-});
-
 app.logger = logger;
 
-app.use(require("morgan")("combined", {
-    "stream": logger.stream
-}));
+app.use(morgan('combined'));
 
 // create api router
-app.api = createApiRouter(app.config, morgan, accessLogStream, logger);
+app.api = createApiRouter(app.config, morgan, logger);
 
 // mount api before csrf is appended to the app stack
 app.use(app.config.baseUrl + '/api/v' + app.config.api.version, app.api);
@@ -196,7 +169,7 @@ server.listen(app.get('port'), function () {
     app.utility.analytics(app, 'START_SERVER', '', '1');
 });
 
-function createApiRouter(config, morgan, accessLogStream, logger) {
+function createApiRouter(config, morgan, logger) {
 
     var router = new express.Router();
     router.use(bodyParser.urlencoded({
@@ -213,9 +186,6 @@ function createApiRouter(config, morgan, accessLogStream, logger) {
     } else {
         logger.log('error', 'jwt not specified in configuration')
     }
-    // setup the logger
-    //router.use(morgan(config.logFormat, {stream: accessLogStream}))
-
     //setup routes
     require('./apiRoutes')(router, app);
 
